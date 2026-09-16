@@ -267,13 +267,19 @@ function self.openData(loaded, filepath, anonymous)
   config.save()
 end
 
-local OPEN_FILE_FILTER = 'xdrv;sm,ssc;ogg'
-local SAVE_FILE_FILTER = 'xdrv'
+local OPEN_FILE_FILTER = {
+  { name = 'EX-XDRiVER Chart File', spec = 'xdrv' },
+  { name = 'StepMania Chart File',  spec = 'sm,ssc' },
+  { name = 'OGG Audio File',        spec = 'ogg' },
+}
+local SAVE_FILE_FILTER = {
+  { name = 'EX-XDRiVER Chart File', spec = 'xdrv' }
+}
 
 function self.openChart()
   local songsFolder = exxdriver.getAdditionalFolders()[1]
   -- i could not tell you why appending /? to a path makes it open the folder
-  filesystem.openDialog(songsFolder and (songsFolder .. '/?'), OPEN_FILE_FILTER, function(path)
+  filesystem.openDialog(songsFolder and (songsFolder .. '/'), OPEN_FILE_FILTER, function(path)
     if path then
       self.openPath(path)
     else
@@ -633,7 +639,7 @@ end
 function self.saveChart()
   if not self.chart then return end
 
-  filesystem.saveDialog(self.chartDir .. makeChartFilename(self.metadata), SAVE_FILE_FILTER, function(path)
+  filesystem.saveDialog(self.chartDir, makeChartFilename(self.metadata), SAVE_FILE_FILTER, function(path)
     if path then
       save(path)
     else

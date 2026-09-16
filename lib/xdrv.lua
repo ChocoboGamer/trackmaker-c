@@ -356,13 +356,13 @@ function M.formatDifficultyShort(d)
   if d == M.XDRVDifficulty.Hyper then return 'HY' end
   if d == M.XDRVDifficulty.Extreme then return 'EX' end
   if d == M.XDRVDifficulty.Overdrive then return 'OV' end
-  return 'BG'
+  return 'NM'
 end
 
 local function parseLane(str)
   if str == 'left' then return M.XDRVLane.Left end
   if str == 'right' then return M.XDRVLane.Right end
-  return -1
+  return M.XDRVLane.None
 end
 local function formatLane(lane)
   if lane == M.XDRVLane.Left then return 'left' end
@@ -371,12 +371,14 @@ end
 
 ---@enum XDRVLane
 M.XDRVLane = {
+  None = -1,
   Left = 1,
   Right = 2,
 }
 
 ---@enum XDRVDriftDirection
 M.XDRVDriftDirection = {
+  None = -1,
   Left = 1,
   Right = 2,
   Neutral = 3,
@@ -402,188 +404,260 @@ M.XDRVDriftDirection = {
 ---@alias XDRVFake { beat: number, fake: { [1]: number, [2]: XDRVNoteColumn? } }
 ---@alias XDRVSceneEvent { beat: number, event: { name: string, args: string[] } }
 ---@alias XDRVCheckpoint { beat: number, checkpoint: string }
----@alias XDRVMeasureLine { beat: number, measureLine: XDRVLane | -1 }
+---@alias XDRVMeasureLine { beat: number, measureLine: XDRVLane }
 ---@alias XDRVThing XDRVNote | XDRVHoldStart | XDRVHoldEnd | XDRVGearShift | XDRVGearShiftStart | XDRVGearShiftEnd | XDRVDrift | XDRVBPMChange | XDRVWarp | XDRVStop | XDRVStopSeconds | XDRVScroll | XDRVTimeSignature | XDRVComboTicks | XDRVLabel | XDRVFake | XDRVSceneEvent | XDRVCheckpoint | XDRVMeasureLine
+
+local raw_parsers = {
+  [0] = {
+    MEASURE_LINE = function(beat, arg1)
+      return {
+        beat = beat,
+        measureLine = parseLane(arg1),
+      }
+    end,
+  },
+  [1] = {
+    BPM = function(beat, arg1)
+      return {
+        beat = beat,
+        bpm = tonumber(arg1),
+      }
+    end,
+
+    WARP = function(beat, arg1)
+      return {
+        beat = beat,
+        warp = tonumber(arg1),
+      }
+    end,
+
+    STOP = function(beat, arg1)
+      return {
+        beat = beat,
+        stop = tonumber(arg1),
+      }
+    end,
+
+    STOP_SECONDS = function(beat, arg1)
+      return {
+        beat = beat,
+        stopSeconds = tonumber(arg1),
+      }
+    end,
+
+    SCROLL = function(beat, arg1)
+      return {
+        beat = beat,
+        scroll = tonumber(arg1),
+      }
+    end,
+
+    COMBO_TICKS = function(beat, arg1)
+      return {
+        beat = beat,
+        comboTicks = tonumber(arg1),
+      }
+    end,
+
+    LABEL = function(beat, arg1)
+      return {
+        beat = beat,
+        label = arg1,
+      }
+    end,
+
+    FAKE = function(beat, arg1, arg2)
+      return {
+        beat = beat,
+        fake = { tonumber(arg1), arg2 and tonumber(arg2) },
+      }
+    end,
+
+    EVENT = function(beat, arg1, ...)
+      return {
+        beat = beat,
+        event = { name = arg1, args = { ... } },
+      }
+    end,
+
+    CHECKPOINT = function(beat, arg1)
+      return {
+        beat = beat,
+        checkpoint = arg1,
+      }
+    end,
+  },
+  [2] = {
+    TIME_SIGNATURE = function(beat, arg1, arg2)
+      return {
+        beat = beat,
+        timeSignature = { tonumber(arg1), tonumber(arg2) },
+      }
+    end,
+  },
+}
 
 ---@return XDRVThing?
 local function parseTimingSegment(beat, s)
-  s = string.sub(s, 2) -- remove leading #
-  local eq = string.find(s, '=')
-
-  local key = s
-  local value = ''
-  if eq then
-    key = string.sub(s, 1, eq - 1)
-    value = string.sub(s, eq + 1)
-  end
+  local key, value = string.match(s, '^#?([^=]+)=?(.*)$')
 
   local args = {}
-  if eq then
-    for arg in string.gmatch(value, '([^,]+)') do
-      table.insert(args, arg)
-    end
+  for arg in string.gmatch(value, '[^,]+') do
+    table.insert(args, arg)
   end
 
-  if key == 'BPM' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      bpm = tonumber(args[1]),
-    }
-  elseif key == 'WARP' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      warp = tonumber(args[1]),
-    }
-  elseif key == 'STOP' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      stop = tonumber(args[1]),
-    }
-  elseif key == 'STOP_SECONDS' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      stopSeconds = tonumber(args[1]),
-    }
-  elseif key == 'SCROLL' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      scroll = tonumber(args[1]),
-    }
-  elseif key == 'TIME_SIGNATURE' then
-    if not args[1] then return nil end
-    if not args[2] then return nil end
-    return {
-      beat = beat,
-      timeSignature = { tonumber(args[1]), tonumber(args[2]) },
-    }
-  elseif key == 'COMBO_TICKS' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      comboTicks = tonumber(args[1]),
-    }
-  elseif key == 'COMBO' then
-    -- unused
-  elseif key == 'LABEL' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      label = args[1],
-    }
-  elseif key == 'FAKE' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      fake = {
-        tonumber(args[1]),
-        args[2] and tonumber(args[2])
-      }
-    }
-  elseif key == 'EVENT' then
-    if not args[1] then return nil end
-    local name = args[1]
-
-    local eventArgs = {}
-    for i = 2, #args do
-      table.insert(eventArgs, args[i])
+  for min_args = 0, 2 do
+    local parser = raw_parsers[min_args][key]
+    if parser then
+      return parser(beat, unpack(args))
     end
-
-    return {
-      beat = beat,
-      event = { name = name, args = eventArgs }
-    }
-  elseif key == 'CHECKPOINT' then
-    if not args[1] then return nil end
-    return {
-      beat = beat,
-      checkpoint = args[1],
-    }
-  elseif key == 'MEASURE_LINE' then
-    return {
-      beat = beat,
-      measureLine = parseLane(args[1]),
-    }
   end
-
   return nil
 end
 
----@param things XDRVThing[]
+---@param chart_events XDRVThing[]
 ---@return XDRVThing[]
-function M.addHoldEnds(things)
+function M.addHoldEnds(chart_events)
   local newEvents = {}
-  for _, thing in ipairs(things) do
-    if thing.note and thing.note.length then
-      table.insert(newEvents, { beat = thing.beat, holdStart = { column = thing.note.column } })
-      table.insert(newEvents, { beat = thing.beat + thing.note.length, holdEnd = { column = thing.note.column } })
-    elseif thing.gearShift then
-      table.insert(newEvents, { beat = thing.beat, gearShiftStart = { lane = thing.gearShift.lane } })
-      table.insert(newEvents,
-        { beat = thing.beat + thing.gearShift.length, gearShiftEnd = { lane = thing.gearShift.lane } })
+
+  for _, event in ipairs(chart_events) do
+    if event.note and event.note.length then
+      if event.note.length == 0 then -- 0 length hold outputs a tap note
+        table.insert(newEvents, {
+          beat = event.beat,
+          note = { column = event.note.column, mine = event.note.mine }
+        })
+      else
+        table.insert(newEvents, {
+          beat = event.beat,
+          holdStart = { column = event.note.column }
+        })
+        table.insert(newEvents, {
+          beat = event.beat + event.note.length,
+          holdEnd = { column = event.note.column }
+        })
+      end
+    elseif event.gearShift then
+      if event.gearShift.length == 0 then -- 0 length gear outputs a gearhead
+        table.insert(newEvents, {
+          beat = event.beat,
+          gearShiftStart = { lane = event.gearShift.lane }
+        })
+      else
+        table.insert(newEvents, {
+          beat = event.beat,
+          gearShiftStart = { lane = event.gearShift.lane }
+        })
+        table.insert(newEvents, {
+          beat = event.beat + event.gearShift.length,
+          gearShiftEnd = { lane = event.gearShift.lane }
+        })
+      end
     else
-      table.insert(newEvents, thing)
+      table.insert(newEvents, event)
     end
   end
-  return newEvents
+
+  -- event lists should be sorted and this function doesn't product a sorted event table
+  return sort.insertion_sort(newEvents, function(a, b) return a.beat < b.beat end)
 end
 
----@param things XDRVThing[]
+---@param chart_events XDRVThing[]
 ---@return XDRVThing[]
-function M.collapseHoldEnds(things)
-  local indices = {}
-  local insertIndices = {}
-
+function M.collapseHoldEnds(chart_events)
   local newEvents = {}
 
-  for i, thing in ipairs(things) do
-    if thing.holdStart then
-      local column = thing.holdStart.column
-      indices[column] = i
-      insertIndices[column] = #newEvents + 1
-    elseif thing.gearShiftStart then
-      local column = -thing.gearShiftStart.lane
-      indices[column] = i
-      insertIndices[column] = #newEvents + 1
-    elseif thing.holdEnd then
-      local column = thing.holdEnd.column
-      local start = indices[column]
-      local insert = insertIndices[column]
-      if start then
-        table.insert(newEvents, insert, {
-          beat = things[start].beat,
+  local hold_info = {}
+  local gear_info = {}
+  local function increment_idx(beat)
+    for _, info in pairs(hold_info) do
+      if info.obj.beat >= beat then
+        info.idx = info.idx + 1
+      end
+    end
+    for _, info in pairs(gear_info) do
+      if info.obj.beat >= beat then
+        info.idx = info.idx + 1
+      end
+    end
+  end
+
+  for _, event in ipairs(chart_events) do
+    if event.holdStart then
+      local col = event.holdStart.column
+
+      local info = hold_info[col]
+      if info and not info.used then
+        table.insert(newEvents, info.idx, {
+          beat = info.obj.beat,
           note = {
-            column = column,
-            length = thing.beat - things[start].beat
+            column = col,
+            mine = false
+          },
+        })
+        increment_idx(info.obj.beat)
+      end
+
+      hold_info[col] = {
+        obj = event,
+        idx = #newEvents + 1,
+        used = false,
+      }
+    elseif event.holdEnd then
+      local col = event.holdEnd.column
+
+      local info = hold_info[col]
+      if info then
+        table.insert(newEvents, info.idx, {
+          beat = info.obj.beat,
+          note = {
+            column = col,
+            length = event.beat - info.obj.beat,
+            mine = false,
           }
         })
-        for k, v in pairs(insertIndices) do
-          insertIndices[k] = v + 1
-        end
+        increment_idx(info.obj.beat)
+
+        info.used = true
       end
-    elseif thing.gearShiftEnd then
-      local lane = thing.gearShiftEnd.lane
-      local column = -lane
-      local start = indices[column]
-      local insert = insertIndices[column]
-      if start then
-        table.insert(newEvents, insert, {
-          beat = things[start].beat,
+    elseif event.gearShiftStart then
+      local lane = event.gearShiftStart.lane
+
+      local info = gear_info[lane]
+      if info and not info.used then
+        table.insert(newEvents, info.idx, {
+          beat = info.obj.beat,
           gearShift = {
             lane = lane,
-            length = thing.beat - things[start].beat
+            length = 0,
+          },
+        })
+        increment_idx(info.obj.beat)
+      end
+
+      gear_info[lane] = {
+        obj = event,
+        idx = #newEvents + 1,
+        used = false,
+      }
+    elseif event.gearShiftEnd then
+      local lane = event.gearShiftEnd.lane
+
+      local info = gear_info[lane]
+      if info then
+        table.insert(newEvents, info.idx, {
+          beat = info.obj.beat,
+          gearShift = {
+            lane = lane,
+            length = event.beat - info.obj.beat,
           }
         })
-        for k, v in pairs(insertIndices) do
-          insertIndices[k] = v + 1
-        end
+        increment_idx(info.obj.beat)
+
+        info.used = true
       end
     else
-      table.insert(newEvents, thing)
+      table.insert(newEvents, event)
     end
   end
 
@@ -673,13 +747,6 @@ end
 ---@param things XDRVThing[]
 local function serializeChart(things)
   things = M.addHoldEnds(things)
-
-  -- a lot of code assumes this table is sorted
-  -- preferably we shouldn't sort it to do so, but making `addHoldEnds` work
-  -- with properly sorted tables is a TODO
-  sort.insertion_sort(things, function(a, b) return a.beat < b.beat end)
-
-  --print(pretty(things))
 
   local segments = {}
 

@@ -175,7 +175,7 @@ ActionBarWidget.barItems = {
         bind = keybinds.binds.reload
       },
       { 'Import', {
-        { '.SM/.SSC file', click = function() chart.importMenu('sm,ssc') end },
+        { '.SM/.SSC file', click = function() chart.importMenu({ name = 'StepMania Chart File', spec = 'sm,ssc' }) end },
       } },
       {},
       {
@@ -197,8 +197,10 @@ ActionBarWidget.barItems = {
   },
   { 'View',
     {
-      toggle { 'Preview mode', get = function() return config.config.previewMode end, set = function(v) config.config.previewMode =
-        v end },
+      toggle { 'Preview mode', get = function() return config.config.previewMode end, set = function(v)
+        config.config.previewMode =
+            v
+      end },
       toggle { 'CMod', get = function() return config.config.cmod end, set = function(v) config.config.cmod = v end },
       { 'Controller glyphs...', glyphListEntries },
       { 'View...', {
@@ -361,7 +363,7 @@ ActionBarWidget.barItems = {
         table.insert(entries, {
           'Other...',
           click = function()
-            filesystem.openDialog('', 'ttf;otf', function(path)
+            filesystem.openDialog(nil, { { name = 'TTF Font File', spec = 'ttf' } }, function(path)
               if not path then return end
 
               local ext = string.sub(path, -4)
@@ -440,24 +442,25 @@ ActionBarWidget.barItems = {
         table.insert(entries, {
           'Import from JSON...',
           click = function()
-            filesystem.openDialog(exxdriver.getColorSchemePath() .. '/', 'json', function(path)
-              if not path then return end
-              local file, err = io.open(path, 'r')
-              if not file then
-                logs.warn(err)
-                return
-              end
-              local raw = file:read('*a')
-              file:close()
+            filesystem.openDialog(exxdriver.getColorSchemePath() .. '/',
+              { { name = 'EX-XDRiVER Color Scheme', spec = 'json' } }, function(path)
+                if not path then return end
+                local file, err = io.open(path, 'r')
+                if not file then
+                  logs.warn(err)
+                  return
+                end
+                local raw = file:read('*a')
+                file:close()
 
-              local data = json.decode(raw)
-              xdrvColors.setCustom(data.Colors)
-              xdrvColors.setScheme('custom')
+                local data = json.decode(raw)
+                xdrvColors.setCustom(data.Colors)
+                xdrvColors.setScheme('custom')
 
-              config.config.xdrvColors = 'custom'
-              events.redraw()
-              config.save()
-            end)
+                config.config.xdrvColors = 'custom'
+                events.redraw()
+                config.save()
+              end)
           end
         })
 

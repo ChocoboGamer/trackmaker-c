@@ -1,22 +1,6 @@
 local self = {}
 
--- hack to load c libs in fused mode
--- https://love2d.org/forums/viewtopic.php?t=86149
-if MACOS then
-  local base = love.filesystem.getSourceBaseDirectory()
-  package.preload['nfd'] = package.loadlib(base .. '/nfd.so', 'luaopen_nfd')
-end
-
-local success, nfd = pcall(require, 'nfd')
-
-if not success then
-  error(
-    'Failed to load NFD library! Did you forget to add nfd.dll/nfd.so? ' ..
-    '(base dir: ' .. love.filesystem.getSourceBaseDirectory() .. ')\n' ..
-    nfd
-  )
-end
-
+local nfd = require 'lib.nfd_bind'
 local threads = require 'src.threads'
 local config  = require 'src.config'
 
@@ -51,11 +35,10 @@ function self.openDialog(path, filter, callback)
   if callback then
     if self.supportWindowsInThreads() then
       local code = [[
-        local args = {...}
-        local channelName, path, filter = unpack(args)
+        local channelName, path, filter = ...
         local channel = love.thread.getChannel(channelName)
 
-        local nfd = require('nfd')
+        local nfd = require('lib.nfd_bind')
 
         local res = nfd.open(filter, path)
         channel:push(res)
@@ -76,25 +59,24 @@ function self.openDialog(path, filter, callback)
   end
 end
 
-function self.saveDialog(path, filter, callback)
+function self.saveDialog(path, filename, filter, callback)
   path = fixNFDPath(path)
 
   if callback then
     if self.supportWindowsInThreads() then
       local code = [[
-        local args = {...}
-        local channelName, path, filter = unpack(args)
+        local channelName, path, filter, filename = ...
         local channel = love.thread.getChannel(channelName)
 
-        local nfd = require('nfd')
+        local nfd = require('lib.nfd_bind')
 
-        local res = nfd.save(filter, path)
+        local res = nfd.save(filter, path, filename)
         channel:push(res)
       ]]
 
-      return threads.createStartWithCallback(code, callback, path, filter)
+      return threads.createStartWithCallback(code, callback, path, filter, filename)
     else
-      callback(nfd.save(filter, path))
+      callback(nfd.save(filter, path, filename))
 
       return false, false
     end
