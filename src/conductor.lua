@@ -360,21 +360,24 @@ function M.update(dt)
     local num_tick = 0
 
     for i, thing in ipairs(chart.chart) do
-      if (thing.note or thing.gearShift) and thing.beat < M.beat and not chartStates[i].hit then
+      if (thing.note or thing.gearShift) and thing.beat <= M.beat and not chartStates[i].hit then
+        local is_mine = thing.note and thing.note.mine
         chartStates[i].hit = true
-        onInputPress(thing)
-        if thing.note and not thing.note.length then
-          onInputRelease(thing)
-        end
-        if config.config.noteTick then
-          num_tick = num_tick + 1
+        if not is_mine then
+          onInputPress(thing)
+          if thing.note and not thing.note.length then
+            onInputRelease(thing)
+          end
+          if config.config.noteTick then
+            num_tick = num_tick + 1
+          end
         end
       end
       if ((thing.note and thing.note.length) or thing.gearShift) and not chartStates[i].hitEnd then
         local length = 0
         if thing.note then length = thing.note.length end
         if thing.gearShift then length = thing.gearShift.length end
-        if (thing.beat + length) < M.beat then
+        if (thing.beat + length) <= M.beat then
           chartStates[i].hitEnd = true
           onInputRelease(thing)
           if thing.gearShift and config.config.noteTick then
@@ -385,8 +388,8 @@ function M.update(dt)
     end
 
     if num_tick > 0 then
-      print("playing tick with volume: ",num_tick)
-      noteTickSFX:play(1-0.3^num_tick)
+      print('playing tick with volume: ', num_tick)
+      noteTickSFX:play(1 - 0.3 ^ num_tick)
     end
   end
   M.updateBeat()
