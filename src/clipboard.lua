@@ -1,6 +1,6 @@
 local xdrv = require 'lib.xdrv'
 
-local MAGIC = 'wabung'
+local MAGIC = 'wizvol'
 
 local self = {}
 
@@ -10,26 +10,26 @@ local self = {}
 -- wabung$tB$>▭2+.5▭31&▭6&▭35&▭4&▭3&▭5&▭13&▭5&▭3&▭5&▭3&▭1&◨~4+1.5▭3~.5&▭6~1+2▭3~.5+1▭5~.5
 -- wabung$tB$>▭46+.5▭5&▭4&▭2&▭31&▭6&▭35&▭4&▭3&▭5&▭13&▭5&▭3&▭5&▭3&▭1&◨~4+1.5▭3~.5&▭6~1
 
-local SYMBOLS = {
+local SEPERATOR = '$'
+
+local SYMBOL = {
   PLUS = '+',
   PLUS_REPEAT = '&',
   HOLD = '~',
-  NOTE = '▭',
-  GEAR_LEFT = '◧',
-  GEAR_RIGHT = '◨',
-  DRIFT_LEFT = '◁',
-  DRIFT_RIGHT = '▷',
-  DRIFT_NEUTRAL = '◇',
+  NOTE = 'o',
+  MINE = 'x',
+  GEAR_LEFT = 'l',
+  GEAR_RIGHT = 'r',
+  DRIFT_LEFT = '<',
+  DRIFT_RIGHT = '>',
+  DRIFT_NEUTRAL = 'v',
 }
+local SYMBOL_CHAR = '+&~oxlr<>v'
 
 ---@param number number
 ---@return string
 local function formatNum(number)
-  local n = tostring(number)
-  if string.sub(n, 1, 1) == '0' then
-    n = string.sub(n, 2)
-  end
-  return n
+  return string.match(tostring(number), '^0*(.*)$')
 end
 ---@param str string
 ---@return number?
@@ -37,147 +37,180 @@ local function readNum(str)
   return tonumber('0' .. str)
 end
 
----@param things XDRVThing[]
----@param opt? { useSeconds: boolean? }
+---@param chart_events XDRVThing[]
 ---@return string
-function self.encode(things, opt)
-  opt = opt or {}
-
+function self.encode(chart_events)
   local clip = {}
 
-  local lastGap
-  local lastWasNote = false
-  local b = things[1].beat
-  for _, thing in ipairs(things) do
-    if thing.beat > b then
-      local gap = thing.beat - b
-      if gap == lastGap then
-        table.insert(clip, SYMBOLS.PLUS_REPEAT)
-      else
-        lastGap = gap
-        table.insert(clip, SYMBOLS.PLUS .. formatNum(thing.beat - b))
+  local cur_beat = chart_events[1].beat
+  for _, event in ipairs(chart_events) do
+    if event.beat > cur_beat then
+      local gap = event.beat - cur_beat
+      table.insert(clip, SYMBOL.PLUS .. formatNum(gap))
+      cur_beat = event.beat
+    end
+
+    local str = ''
+    if event.note then
+      local isMine = event.note.mine
+      local isHold = event.note.length ~= nil
+
+      local char = SYMBOL.NOTE
+      local col = event.note.column
+      local hold = ''
+
+      if isMine then
+        char = SYMBOL.MINE
       end
-      b = thing.beat
-      lastWasNote = false
-    end
-    if thing.note then
-      local isHold = thing.note.length ~= nil
-      if isHold then lastWasNote = false end
-      if lastWasNote then
-        -- compact chords
-        table.insert(clip, thing.note.column)
-      else
-        table.insert(clip,
-          SYMBOLS.NOTE .. thing.note.column .. (isHold and (SYMBOLS.HOLD .. formatNum(thing.note.length)) or ''))
+      if isHold then
+        hold = SYMBOL.HOLD .. formatNum(event.note.length)
       end
-      lastWasNote = true
-    else
-      lastWasNote = false
-    end
-    if thing.gearShift then
-      local char = thing.gearShift.lane == xdrv.XDRVLane.Left and SYMBOLS.GEAR_LEFT or SYMBOLS.GEAR_RIGHT
-      table.insert(clip, char .. SYMBOLS.HOLD .. formatNum(thing.gearShift.length))
-    end
-    if thing.drift then
-      local char = SYMBOLS.DRIFT_NEUTRAL
-      if thing.drift.direction == xdrv.XDRVDriftDirection.Left then
-        char = SYMBOLS.DRIFT_LEFT
-      elseif thing.drift.direction == xdrv.XDRVDriftDirection.Right then
-        char = SYMBOLS.DRIFT_RIGHT
+
+      str = char .. col .. hold
+    elseif event.gearShift then
+      local char = SYMBOL.GEAR_LEFT
+      local hold = SYMBOL.HOLD .. formatNum(event.gearShift.length)
+
+      if event.gearShift.lane == xdrv.XDRVLane.Right then
+        char = SYMBOL.GEAR_RIGHT
       end
-      table.insert(clip, char)
+
+      str = char .. hold
+    elseif event.drift then
+      local char = SYMBOL.DRIFT_NEUTRAL
+      if event.drift.direction == xdrv.XDRVDriftDirection.Left then
+        char = SYMBOL.DRIFT_LEFT
+      elseif event.drift.direction == xdrv.XDRVDriftDirection.Right then
+        char = SYMBOL.DRIFT_RIGHT
+      end
+      str = char
     end
+    table.insert(clip, str)
   end
 
-  local meta = {}
+  local out = {}
 
-  table.insert(meta, MAGIC)
-  -- timing
-  table.insert(meta, 't' .. (opt.useSeconds and 'S' or 'B'))
+  --MAGIC
+  table.insert(out, MAGIC)
   -- chart
-  table.insert(meta, '>' .. table.concat(clip, ''))
+  table.insert(out, table.concat(clip, ''))
 
-  return table.concat(meta, '$')
+  return table.concat(out, SEPERATOR)
 end
 
----@param str string
+---@param clipboard_str string
 ---@return XDRVThing[]?
-function self.decode(str)
-  local isValid = string.find(str, '^wabung%$')
-  if not isValid then return end
+function self.decode(clipboard_str)
+  local chart_events = {}
 
-  local useSeconds = false
-  local things = {}
+  local chart = string.match(clipboard_str, string.format('^%s%s(.*)$', MAGIC, SEPERATOR))
+  if not chart then
+    return
+  end
 
-  for segment in string.gmatch(str, '[^$]+') do
-    local char = utf8sub(segment, 1, 1)
-    local data = utf8sub(segment, 2)
-    if char == 'w' then
-      -- wabung; trackmaker magic bytes, ignore
-    elseif char == 't' then
-      -- timing
-      useSeconds = data == 'S'
-    elseif char == '>' then
-      -- notedata
-      local b = 0
-      local lastGap
-      local buf = data
+  local cur_beat = 0
+  for command in string.gmatch(chart, string.format('[%s][^%s]*', SYMBOL_CHAR, SYMBOL_CHAR)) do
+    local type, arg_str = string.match(command, '^(.)(.*)$')
+    local arg = readNum(arg_str)
 
-      local thingBuffer = nil
 
-      while true do
-        if #buf == 0 then break end
-        local type = utf8sub(buf, 1, 1)
-        local num, rest = string.match(utf8sub(buf, 2), '([%d.]*)(.*)')
-        if not num then break end
-        if not rest then break end
-        buf = rest
-
-        if type == SYMBOLS.HOLD and thingBuffer then
-          if thingBuffer.note then
-            thingBuffer.note.length = readNum(num)
-          elseif thingBuffer.gearShift then
-            thingBuffer.gearShift.length = readNum(num)
-          end
-        else
-          if thingBuffer ~= nil then table.insert(things, thingBuffer) end
-          thingBuffer = nil
-
-          if type == SYMBOLS.NOTE then
-            if #num > 1 then
-              -- compact chords
-              for col in string.gmatch(num, '%d') do
-                table.insert(things, { beat = b, note = { column = tonumber(col) } })
-              end
-            else
-              thingBuffer = { beat = b, note = { column = readNum(num) } }
-            end
-          elseif type == SYMBOLS.GEAR_LEFT or type == SYMBOLS.GEAR_RIGHT then
-            local lane = type == SYMBOLS.GEAR_LEFT and xdrv.XDRVLane.Left or xdrv.XDRVLane.Right
-            thingBuffer = { beat = b, gearShift = { lane = lane } }
-          elseif type == SYMBOLS.DRIFT_LEFT or type == SYMBOLS.DRIFT_RIGHT or type == SYMBOLS.DRIFT_NEUTRAL then
-            local dir = xdrv.XDRVDriftDirection.Neutral
-            if type == SYMBOLS.DRIFT_LEFT then
-              dir = xdrv.XDRVDriftDirection.Left
-            elseif type == SYMBOLS.DRIFT_RIGHT then
-              dir = xdrv.XDRVDriftDirection.Right
-            end
-            thingBuffer = { beat = b, drift = { direction = dir } }
-          elseif type == SYMBOLS.PLUS then
-            local gap = readNum(num)
-            lastGap = gap
-            b = b + gap
-          elseif type == SYMBOLS.PLUS_REPEAT then
-            b = b + lastGap
-          end
+    if type == SYMBOL.PLUS then
+      cur_beat = cur_beat + arg
+    elseif type == SYMBOL.HOLD then
+      local prev = chart_events[#chart_events]
+      if prev then
+        if prev.note then
+          prev.note.length = arg
+        elseif prev.gearShift then
+          prev.gearShift.length = arg
         end
       end
-
-      if thingBuffer ~= nil then table.insert(things, thingBuffer) end
+    elseif type == SYMBOL.NOTE then
+      table.insert(chart_events, { beat = cur_beat, note = { column = arg } })
+    elseif type == SYMBOL.MINE then
+      table.insert(chart_events, { beat = cur_beat, note = { column = arg, mine = true } })
+    elseif type == SYMBOL.GEAR_LEFT then
+      table.insert(chart_events, { beat = cur_beat, gearShift = { lane = xdrv.XDRVLane.Left, length = 0 } })
+    elseif type == SYMBOL.GEAR_RIGHT then
+      table.insert(chart_events, { beat = cur_beat, gearShift = { lane = xdrv.XDRVLane.Right, length = 0 } })
+    elseif type == SYMBOL.DRIFT_LEFT then
+      table.insert(chart_events, { beat = cur_beat, drift = { direction = xdrv.XDRVDriftDirection.Left } })
+    elseif type == SYMBOL.DRIFT_RIGHT then
+      table.insert(chart_events, { beat = cur_beat, drift = { direction = xdrv.XDRVDriftDirection.Right } })
+    elseif type == SYMBOL.DRIFT_NEUTRAL then
+      table.insert(chart_events, { beat = cur_beat, drift = { direction = xdrv.XDRVDriftDirection.Neutral } })
     end
   end
 
-  return things
+  --for segment in string.gmatch(clipboard_str, '[^$]+') do
+  --  local char = utf8sub(segment, 1, 1)
+  --  local data = utf8sub(segment, 2)
+  --  if char == 'w' then
+  --    -- wabung; trackmaker magic bytes, ignore
+  --  elseif char == 't' then
+  --    -- timing
+  --    useSeconds = data == 'S'
+  --  elseif char == '>' then
+  --    -- notedata
+  --    local b = 0
+  --    local lastGap
+  --    local buf = data
+
+  --    local thingBuffer = nil
+
+  --    while true do
+  --      if #buf == 0 then break end
+  --      local type = utf8sub(buf, 1, 1)
+  --      local num, rest = string.match(utf8sub(buf, 2), '([%d.]*)(.*)')
+  --      if not num then break end
+  --      if not rest then break end
+  --      buf = rest
+
+  --      if type == SYMBOL.HOLD and thingBuffer then
+  --        if thingBuffer.note then
+  --          thingBuffer.note.length = readNum(num)
+  --        elseif thingBuffer.gearShift then
+  --          thingBuffer.gearShift.length = readNum(num)
+  --        end
+  --      else
+  --        if thingBuffer ~= nil then table.insert(chart_events, thingBuffer) end
+  --        thingBuffer = nil
+
+  --        if type == SYMBOL.NOTE then
+  --          if #num > 1 then
+  --            -- compact chords
+  --            for col in string.gmatch(num, '%d') do
+  --              table.insert(chart_events, { beat = b, note = { column = tonumber(col) } })
+  --            end
+  --          else
+  --            thingBuffer = { beat = b, note = { column = readNum(num) } }
+  --          end
+  --        elseif type == SYMBOL.GEAR_LEFT or type == SYMBOL.GEAR_RIGHT then
+  --          local lane = type == SYMBOL.GEAR_LEFT and xdrv.XDRVLane.Left or xdrv.XDRVLane.Right
+  --          thingBuffer = { beat = b, gearShift = { lane = lane } }
+  --        elseif type == SYMBOL.DRIFT_LEFT or type == SYMBOL.DRIFT_RIGHT or type == SYMBOL.DRIFT_NEUTRAL then
+  --          local dir = xdrv.XDRVDriftDirection.Neutral
+  --          if type == SYMBOL.DRIFT_LEFT then
+  --            dir = xdrv.XDRVDriftDirection.Left
+  --          elseif type == SYMBOL.DRIFT_RIGHT then
+  --            dir = xdrv.XDRVDriftDirection.Right
+  --          end
+  --          thingBuffer = { beat = b, drift = { direction = dir } }
+  --        elseif type == SYMBOL.PLUS then
+  --          local gap = readNum(num)
+  --          lastGap = gap
+  --          b = b + gap
+  --        elseif type == SYMBOL.PLUS_REPEAT then
+  --          b = b + lastGap
+  --        end
+  --      end
+  --    end
+
+  --    if thingBuffer ~= nil then table.insert(chart_events, thingBuffer) end
+  --  end
+  --end
+
+  return chart_events
 end
 
 return self
