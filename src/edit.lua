@@ -429,7 +429,7 @@ function self.paste()
     chart.placeThing(thing)
     table.insert(self.selection, thing)
   end
-  chart.insertHistory(#things .. 'pasted notes')
+  chart.insertHistory(#things .. ' pasted notes')
   logs.log('Pasted ' .. #things .. ' notes')
 end
 
