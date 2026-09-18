@@ -363,7 +363,11 @@ ActionBarWidget.barItems = {
         table.insert(entries, {
           'Other...',
           click = function()
-            filesystem.openDialog(nil, { { name = 'TTF Font File', spec = 'ttf' } }, function(path)
+            local root = "/"
+            if love.system.getOS() == "Windows" then
+              root = "C:/"
+            end
+            filesystem.openDialog(root, { { name = 'TTF Font File', spec = 'ttf' }, { name = 'OTF Font File', spec = 'otf' } }, function(path)
               if not path then return end
 
               local ext = string.sub(path, -4)
@@ -379,7 +383,7 @@ ActionBarWidget.barItems = {
               initFonts()
               events.redraw()
               config.save()
-            end)
+            end, true)
           end
         })
         table.insert(entries, {})
@@ -460,7 +464,7 @@ ActionBarWidget.barItems = {
                 config.config.xdrvColors = 'custom'
                 events.redraw()
                 config.save()
-              end)
+              end, true)
           end
         })
 

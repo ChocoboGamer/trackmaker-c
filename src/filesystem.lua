@@ -1,8 +1,10 @@
-local self = {}
+local self             = {}
 
-local nfd = require 'lib.nfd_bind'
-local threads = require 'src.threads'
-local config  = require 'src.config'
+local nfd              = require 'lib.nfd_bind'
+local threads          = require 'src.threads'
+local config           = require 'src.config'
+
+local last_opened_path = nil
 
 -- most of this stolen from loenn - thank you for figuring this out!
 -- https://github.com/CelestialCartographers/Loenn/blob/340e1af719ade1ba0c8682141c9f50c3f95ee783/src/utils/filesystem.lua
@@ -29,8 +31,15 @@ local function fixNFDPath(path)
   end
 end
 
-function self.openDialog(path, filter, callback)
-  path = fixNFDPath(path)
+function self.setDefaultPath(path)
+  last_opened_path = path
+end
+
+function self.openDialog(default_path, filter, callback, overwrite_last_open)
+  path = last_opened_path or default_path
+  if default_path and overwrite_last_open then
+    path = default_path
+  end
 
   if callback then
     if self.supportWindowsInThreads() then
@@ -59,8 +68,11 @@ function self.openDialog(path, filter, callback)
   end
 end
 
-function self.saveDialog(path, filename, filter, callback)
-  path = fixNFDPath(path)
+function self.saveDialog(default_path, filename, filter, callback, overwrite_last_open)
+  path = last_opened_path or default_path
+  if default_path and overwrite_last_open then
+    path = default_path
+  end
 
   if callback then
     if self.supportWindowsInThreads() then

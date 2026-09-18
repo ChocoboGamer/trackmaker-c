@@ -222,13 +222,15 @@ function self.openPath(filepath)
       logs.warn(err)
       return
     end
+    filesystem.setDefaultPath(string.match(filepath, ".+\\"))
     local data = file:read('*a')
     file:close()
-
+    
     local loaded = xdrv.deserialize(data)
     self.openData(loaded, filepath)
   elseif ext == 'ogg' then
     local name = basename(filepath)
+    filesystem.setDefaultPath(string.match(filepath, ".+\\"))
     self.openData({
       chart = {},
       metadata = merge(xdrv.defaultMetadata, {
@@ -236,6 +238,7 @@ function self.openPath(filepath)
       }),
     }, filepath, true)
   elseif ext == 'sm' or ext == 'ssc' then
+    filesystem.setDefaultPath(string.match(filepath, ".+\\"))
     self.importPath(filepath, 'sm,ssc')
   else
     logs.warn('Unknown filetype: ' .. (ext or '(no extension)'))
@@ -279,7 +282,7 @@ local SAVE_FILE_FILTER = {
 function self.openChart()
   local songsFolder = exxdriver.getAdditionalFolders()[1]
   -- i could not tell you why appending /? to a path makes it open the folder
-  filesystem.openDialog(songsFolder and (songsFolder .. '/'), OPEN_FILE_FILTER, function(path)
+  filesystem.openDialog(songsFolder and (songsFolder), OPEN_FILE_FILTER, function(path)
     if path then
       self.openPath(path)
     else
