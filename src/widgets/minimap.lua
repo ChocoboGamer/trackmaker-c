@@ -1,6 +1,7 @@
 local conductor     = require 'src.conductor'
 local ContextWidget = require 'src.widgets.context'
 local renderer      = require 'src.renderer'
+local config        = require 'src.config'
 local edit          = require 'src.edit'
 
 ---@class MinimapWidget : Widget
@@ -112,12 +113,14 @@ function MinimapWidget:draw()
   love.graphics.rectangle('fill', 0, self.height - clamp(timeE / chartDur, 0, 1) * (self.height - height), self.width,
     height)
 
-  for _, thing in ipairs(chart.chart) do
-    if thing.checkpoint then
-      love.graphics.setColor(1, 1, 1, 1)
-      local size = 8 / checkTex:getHeight()
-      love.graphics.draw(checkTex, 0, (1 - (conductor.timeAtBeat(thing.beat) / chartDur)) * self.height, 0, size, size,
-        checkTex:getWidth(), checkTex:getHeight() / 2)
+  if config.config.view.checkpoints then
+    for _, thing in ipairs(chart.chart) do
+      if thing.checkpoint then
+        love.graphics.setColor(1, 1, 1, 1)
+        local size = 8 / checkTex:getHeight()
+        love.graphics.draw(checkTex, 0, (1 - (conductor.timeAtBeat(thing.beat) / chartDur)) * self.height, 0, size, size,
+          checkTex:getWidth(), checkTex:getHeight() / 2)
+      end
     end
   end
 
