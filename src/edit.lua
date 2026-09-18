@@ -427,10 +427,9 @@ function self.paste()
   for _, thing in ipairs(things) do
     thing.beat = thing.beat + b
     chart.placeThing(thing)
-    chart.insertHistory('Paste notes')
     table.insert(self.selection, thing)
   end
-
+  chart.insertHistory('Pasted ' .. #things .. ' notes')
   logs.log('Pasted ' .. #things .. ' notes')
 end
 
