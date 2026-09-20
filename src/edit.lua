@@ -298,6 +298,7 @@ function self.mirrorSelection(type)
   end
   logs.log('Mirrored ' .. #self.selection .. ' notes ' .. mirrorStr(type))
   chart.insertHistory('Mirror notes')
+  events.redraw()
 end
 
 function self.deleteSelection()
