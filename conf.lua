@@ -33,10 +33,10 @@ function love.conf(t)
   t.modules.window = true
 
   t.releases = {
-    title = 'trackmaker',
-    package = 'trackmaker',
-    loveVersion = '11.3',
-    version = '0.8.1',
+    title = 'trackmaker-c',
+    package = 'trackmaker-c',
+    loveVersion = '11.5',
+    version = '0.9.0-a',
     author = 'oatmealine',
     email = 'me@oat.zone',
     description = nil,
