@@ -17,7 +17,7 @@ This project contains code, assets and binaries from the following projects
   License: MIT
   Copyright © 2014 rxi
 
-- nativefiledialog [Vexatos's fork]
+- nativefiledialog-extended
   License: zlib
   Copyright © 2014-2021 Frogtoss Games, Inc
 
