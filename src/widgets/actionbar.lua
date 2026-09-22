@@ -264,10 +264,14 @@ ActionBarWidget.barItems = {
         bind = keybinds.binds.paste
       },
       {},
-      { 'Mirror', {
-        { 'Horizontally', click = function() edit.mirrorSelection(edit.MirrorType.Horizontal) end },
-        { 'Vertically',   click = function() edit.mirrorSelection(edit.MirrorType.Vertical) end },
-        { 'Both',         click = function() edit.mirrorSelection(edit.MirrorType.Both) end },
+      { 'Transform', {
+        { 'Mirror All',              click = function() edit.transformSelection(edit.TransformType.MirrorAll) end },
+        { 'Mirror Notes',            click = function() edit.transformSelection(edit.TransformType.MirrorNote) end },
+        { 'Mirror Gears',            click = function() edit.transformSelection(edit.TransformType.MirrorGear) end },
+        { 'Mirror Drifts',           click = function() edit.transformSelection(edit.TransformType.MirrorDrift) end },
+        { 'Swap Trigger and Bumper', click = function() edit.transformSelection(edit.TransformType.SwapTriggerBumper) end },
+        { 'Swap Face and Trigger',   click = function() edit.transformSelection(edit.TransformType.SwapFaceTrigger) end },
+        { 'Swap Face and Bumper',    click = function() edit.transformSelection(edit.TransformType.SwapFaceBumper) end },
       } },
       {},
       {

@@ -231,74 +231,97 @@ function self.updateGhosts()
   events.redraw()
 end
 
----@enum MirrorType
-self.MirrorType = {
-  Horizontal = 0,
-  Vertical = 1,
-  Both = 2,
+---@enum TransformType
+self.TransformType = {
+  Invalid = -1,
+  MirrorAll = 0,
+  MirrorNote = 1,
+  MirrorGear = 2,
+  MirrorDrift = 3,
+  SwapTriggerBumper = 4,
+  SwapFaceTrigger = 5,
+  SwapFaceBumper = 6,
+}
+
+local transform_map = {
+  none = { 1, 2, 3, 4, 5, 6 },
+  mirror = { 6, 5, 4, 3, 2, 1 },
+  trigger_bumper = { 2, 1, 3, 4, 6, 5 },
+  face_trigger = { 3, 2, 1, 6, 5, 4 },
+  face_bumper = { 1, 3, 2, 5, 4, 6 },
 }
 
 ---@param c XDRVNoteColumn
-local function mirrorColumnHoriz(c)
-  return 7 - c
+local function mirrorColumn(c)
+  return transform_map.mirror[c]
 end
----@param c XDRVNoteColumn
-local function mirrorColumnVert(c)
-  if c < 3 then
-    -- 1 -> 2, 2 -> 1
-    return 3 - c
-  end
-  if c > 4 then
-    -- 5 -> 6, 6 -> 5
-    return 11 - c
-  end
-  return c
+
+---@param column XDRVNoteColumn
+local function SwapTriggerBumper(column)
+  return transform_map.trigger_bumper[column]
 end
----@param l XDRVLane
-local function mirrorLane(l)
-  if l == xdrv.XDRVLane.Left then return xdrv.XDRVLane.Right end
-  return xdrv.XDRVLane.Left
+
+---@param column XDRVNoteColumn
+local function SwapFaceTrigger(column)
+  return transform_map.face_trigger[column]
 end
----@param d XDRVDriftDirection
-local function mirrorDriftDir(d)
-  if d == xdrv.XDRVDriftDirection.Left then return xdrv.XDRVDriftDirection.Right end
-  if d == xdrv.XDRVDriftDirection.Right then return xdrv.XDRVDriftDirection.Left end
+
+---@param column XDRVNoteColumn
+local function SwapFaceBumper(column)
+  return transform_map.face_bumper[column]
+end
+
+local transform_func = {
+  [self.TransformType.MirrorAll]         = mirrorColumn,
+  [self.TransformType.MirrorNote]        = mirrorColumn,
+  [self.TransformType.SwapTriggerBumper] = SwapTriggerBumper,
+  [self.TransformType.SwapFaceTrigger]   = SwapFaceTrigger,
+  [self.TransformType.SwapFaceBumper]    = SwapFaceBumper,
+}
+
+---@param lane XDRVLane
+local function mirrorLane(lane)
+  return lane == xdrv.XDRVLane.Left and xdrv.XDRVLane.Right or xdrv.XDRVLane.Left
+end
+
+---@param direction XDRVDriftDirection
+local function mirrorDriftDir(direction)
+  if direction == xdrv.XDRVDriftDirection.Left then return xdrv.XDRVDriftDirection.Right end
+  if direction == xdrv.XDRVDriftDirection.Right then return xdrv.XDRVDriftDirection.Left end
   return xdrv.XDRVDriftDirection.Neutral
 end
 
----@param m MirrorType
-local function mirrorStr(m)
-  if m == self.MirrorType.Horizontal then
-    return 'horizontally'
-  end
-  if m == self.MirrorType.Vertical then
-    return 'vertically'
-  end
-  return 'horizontally and vertically'
-end
+local transform_string = {
+  [self.TransformType.MirrorAll]         = 'Mirrored All %d selected objects',
+  [self.TransformType.MirrorNote]        = 'Mirrored All %d selected notes',
+  [self.TransformType.MirrorGear]        = 'Mirrored All %d selected gears',
+  [self.TransformType.MirrorDrift]       = 'Mirrored All %d selected drifts',
+  [self.TransformType.SwapTriggerBumper] = 'Swapped %d trigger and bumper note(s)',
+  [self.TransformType.SwapFaceTrigger]   = 'Swapped %d face and trigger note(s)',
+  [self.TransformType.SwapFaceBumper]    = 'Swapped %d face and bumper note(s)',
+}
 
----@param type MirrorType
-function self.mirrorSelection(type)
-  local isHorizontal = type == self.MirrorType.Horizontal or type == self.MirrorType.Both
-  local isVertical = type == self.MirrorType.Vertical or type == self.MirrorType.Both
+---@param type TransformType
+function self.transformSelection(type)
+  local affectNotes = type ~= self.TransformType.MirrorGear and type ~= self.TransformType.MirrorDrift
+  local affectGear = type == self.TransformType.MirrorAll or type == self.TransformType.MirrorGear
+  local affectDrift = type == self.TransformType.MirrorAll or type == self.TransformType.MirrorDrift
+
+  local total = 0
   for _, thing in ipairs(self.selection) do
-    if thing.note then
-      if isHorizontal then
-        thing.note.column = mirrorColumnHoriz(thing.note.column)
-      end
-      if isVertical then
-        thing.note.column = mirrorColumnVert(thing.note.column)
-      end
-    end
-    if thing.gearShift and isHorizontal then
+    if thing.note and affectNotes then
+      thing.note.column = transform_func[type](thing.note.column)
+      total = total + 1
+    elseif thing.gearShift and affectGear then
       thing.gearShift.lane = mirrorLane(thing.gearShift.lane)
-    end
-    if thing.drift then
+      total = total + 1
+    elseif thing.drift and affectDrift then
       thing.drift.direction = mirrorDriftDir(thing.drift.direction)
+      total = total + 1
     end
   end
-  logs.log('Mirrored ' .. #self.selection .. ' notes ' .. mirrorStr(type))
-  chart.insertHistory('Mirror notes')
+  logs.log(string.format(transform_string[type], #self.selection))
+  chart.insertHistory('Transform notes')
   events.redraw()
 end
 
