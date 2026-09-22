@@ -327,6 +327,19 @@ ActionBarWidget.barItems = {
       value = function() return MACOS or config.config.noMultithreading end,
       disabled = function() return MACOS end
     },
+    {
+      'Enable modfile preview',
+      click = function()
+        config.config.enableModFilePreview = not config.config.enableModFilePreview
+        logs.log('Modfile Preview: ' .. (config.config.enableModFilePreview and 'ON' or 'OFF'))
+        if config.config.enableModFilePreview then
+          logs.log('NOTICE: Modfile Preview is a heavy WIP and may not work correctly for all modfiles.')
+        end
+        events.onToggleModfilePreview()
+      end,
+      toggle = true,
+      value = function() return config.config.enableModFilePreview end,
+    },
     {},
     { 'Theme', schemesEntries },
     {

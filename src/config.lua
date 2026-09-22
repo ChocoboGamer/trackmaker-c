@@ -11,6 +11,7 @@ self.config = {
   noteTick = false,
   vsync = true,
   noMultithreading = false,
+  enableModFilePreview = false,
   theme = 'catppuccin_macchiato',
   uiFont = 'Inter-Regular.ttf',
   uiFontSize = 12,

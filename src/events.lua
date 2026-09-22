@@ -125,6 +125,11 @@ function events.onChartLoad()
   if macos then macos.bounceDockApp() end
 end
 
+function events.onToggleModfilePreview()
+  logs.logFile('event : onToggleModfilePreview')
+  preview.bakeEases()
+end
+
 -- hacky. oh well
 function events.redraw()
   renderer.redraw()

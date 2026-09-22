@@ -719,6 +719,10 @@ local function getEnv()
 end
 
 function self.bakeEases()
+  if not config.config.enableModFilePreview then
+    return
+  end
+
   eases = {}
   activeEases = {}
   inactiveEases = {}
