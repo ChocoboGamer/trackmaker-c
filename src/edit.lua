@@ -77,6 +77,7 @@ function self.getGhosts()
         length = -length
       end
       if length == 0 then
+        ---@diagnostic disable-next-line: cast-local-type
         length = nil
       end
       table.insert(saneGhosts, {
@@ -119,7 +120,7 @@ function self.beginNote(column)
     if mode == self.Mode.Append then
       setBeat(beat + QUANTS[self.quantIndex])
     end
-  else
+  elseif mode == self.Mode.Rewrite then
     local thing = { beat = beat, note = {} }
     local thingIdx = chart.findThing(thing)
     local lastIdx = thingIdx or 1
@@ -446,6 +447,7 @@ function self.keypressed(key, code, isRepeat)
 
   local ctrl = love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')
   if MACOS then
+    ---@diagnostic disable-next-line: param-type-mismatch
     ctrl = love.keyboard.isDown('lgui') or love.keyboard.isDown('rgui')
   end
   local shift = love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')

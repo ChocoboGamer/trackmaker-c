@@ -3,3 +3,4 @@
 *.dylib
 releases/
 .vscode/*
+changelog.txt

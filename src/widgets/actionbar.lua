@@ -363,27 +363,28 @@ ActionBarWidget.barItems = {
         table.insert(entries, {
           'Other...',
           click = function()
-            local root = "/"
-            if love.system.getOS() == "Windows" then
-              root = "C:/"
+            local root = '/'
+            if love.system.getOS() == 'Windows' then
+              root = 'C:/'
             end
-            filesystem.openDialog(root, { { name = 'TTF Font File', spec = 'ttf' }, { name = 'OTF Font File', spec = 'otf' } }, function(path)
-              if not path then return end
+            filesystem.openDialog(root,
+              { { name = 'TTF Font File', spec = 'ttf' }, { name = 'OTF Font File', spec = 'otf' } }, function(path)
+                if not path then return end
 
-              local ext = string.sub(path, -4)
-              if ext ~= '.ttf' and ext ~= '.otf' then
-                logs.warn('Only .ttf and .otf files are supported')
-                return
-              end
-              if ext == '.otf' then
-                logs.log('LÖVE support for .otf files is experimental, some features may not be supported')
-              end
+                local ext = string.sub(path, -4)
+                if ext ~= '.ttf' and ext ~= '.otf' then
+                  logs.warn('Only .ttf and .otf files are supported')
+                  return
+                end
+                if ext == '.otf' then
+                  logs.log('LÖVE support for .otf files is experimental, some features may not be supported')
+                end
 
-              config.config.uiFont = 'file://' .. path
-              initFonts()
-              events.redraw()
-              config.save()
-            end, true)
+                config.config.uiFont = 'file://' .. path
+                initFonts()
+                events.redraw()
+                config.save()
+              end, true)
           end
         })
         table.insert(entries, {})

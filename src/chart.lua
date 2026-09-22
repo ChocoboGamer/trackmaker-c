@@ -516,7 +516,7 @@ local function save(filepath, noBackup)
   self.sort()
 
   logs.logFile('Printing data just in case')
-  logs.logFile(pretty(chart.chart))
+  logs.logFile(pretty(chart.chart)) -- TODO find out if there is a better way to handle this, because right now it kinda sucks.
 
   if not noBackup then
     local oldFile, missing = io.open(filepath, 'r')
