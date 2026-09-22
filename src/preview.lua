@@ -722,6 +722,9 @@ function self.bakeEases()
   if not config.config.enableModFilePreview then
     return
   end
+  if not chart.metadata then
+    return
+  end
 
   eases = {}
   activeEases = {}
