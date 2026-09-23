@@ -32,10 +32,8 @@ function InfobarWidget:reloadAssets()
 end
 
 function InfobarWidget:drawFrame()
-  if not chart.loaded then return end
-
   local footerFields = {
-    { 'Difficulty', xdrv.formatDifficulty(chart.metadata.chartDifficulty) .. ' ' .. chart.metadata.chartLevel },
+    { 'Difficulty', chart.loaded and (xdrv.formatDifficulty(chart.metadata.chartDifficulty) .. ' ' .. chart.metadata.chartLevel) or '' },
     { 'Snap',       formatSnap(edit.quantIndex) },
     { 'Beat',       string.format('%.3f', conductor.beat) },
     { 'Time',       formatTime(conductor.time) },
@@ -58,6 +56,8 @@ function InfobarWidget:drawFrame()
   self.height = HEIGHT
   self.x = love.graphics.getWidth() / 2 - width / 2
   self.y = love.graphics.getHeight() - 16 - self.height
+
+  if not chart.loaded then return end
 
   love.graphics.push()
 
@@ -96,7 +96,8 @@ function InfobarWidget:drawFrame()
     love.graphics.setColor(0, 0, 0, 1)
   end
   love.graphics.setFont(fonts.inter_16)
-  love.graphics.printf(edit.modeName(mode), round(width + MARGIN), round(self.height / 2 - fonts.inter_16:getHeight() / 2),
+  love.graphics.printf(edit.modeName(mode), round(width + MARGIN),
+    round(self.height / 2 - fonts.inter_16:getHeight() / 2),
     MODE_WIDTH, 'center')
   love.graphics.setFont(fonts.inter_12)
 
