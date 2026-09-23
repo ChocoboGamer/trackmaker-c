@@ -260,13 +260,55 @@ ActionBarWidget.barItems = {
       },
       {},
       { 'Transform', {
-        { 'Mirror All',              click = function() edit.transformSelection(edit.TransformType.MirrorAll) end },
-        { 'Mirror Notes',            click = function() edit.transformSelection(edit.TransformType.MirrorNote) end },
-        { 'Mirror Gears',            click = function() edit.transformSelection(edit.TransformType.MirrorGear) end },
-        { 'Mirror Drifts',           click = function() edit.transformSelection(edit.TransformType.MirrorDrift) end },
-        { 'Swap Trigger and Bumper', click = function() edit.transformSelection(edit.TransformType.SwapTriggerBumper) end },
-        { 'Swap Face and Trigger',   click = function() edit.transformSelection(edit.TransformType.SwapFaceTrigger) end },
-        { 'Swap Face and Bumper',    click = function() edit.transformSelection(edit.TransformType.SwapFaceBumper) end },
+        {
+          'Mirror All',
+          click = function() edit.transformSelection(edit.TransformType.MirrorAll) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Mirror Notes',
+          click = function() edit.transformSelection(edit.TransformType.MirrorNote) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Mirror Gears',
+          click = function() edit.transformSelection(edit.TransformType.MirrorGear) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Mirror Drifts',
+          click = function() edit.transformSelection(edit.TransformType.MirrorDrift) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Swap Trigger and Bumper',
+          click = function() edit.transformSelection(edit.TransformType.SwapTriggerBumper) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Swap Face and Trigger',
+          click = function() edit.transformSelection(edit.TransformType.SwapFaceTrigger) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
+        {
+          'Swap Face and Bumper',
+          click = function() edit.transformSelection(edit.TransformType.SwapFaceBumper) end,
+          disabled = function()
+            return #edit.selection == 0
+          end
+        },
       } },
       {},
       {
