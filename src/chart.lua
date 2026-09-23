@@ -267,7 +267,6 @@ function self.openData(loaded, filepath, anonymous)
   logs.log('Loaded chart ' ..
     (self.metadata.musicTitle or self.metadata.musicAudio or filepath) .. ' ' .. self.diffMark())
   config.appendRecent(filepath)
-  config.save()
 end
 
 local OPEN_FILE_FILTER = {
@@ -281,7 +280,6 @@ local SAVE_FILE_FILTER = {
 
 function self.openChart()
   local songsFolder = exxdriver.getAdditionalFolders()[1]
-  -- i could not tell you why appending /? to a path makes it open the folder
   filesystem.openDialog(songsFolder and (songsFolder), OPEN_FILE_FILTER, function(path)
     if path then
       self.openPath(path)
@@ -557,7 +555,6 @@ local function save(filepath, noBackup)
     config.appendRecent(filepath)
   end
   updateTitle()
-  config.save()
 
   if shouldQuitOnSave then
     love.event.quit(0)

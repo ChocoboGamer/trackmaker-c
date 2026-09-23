@@ -3,7 +3,6 @@ local self = {}
 local json = require 'lib.json'
 
 self.config = {
-  ---@type string[]
   recent = {},
   volume = 1.0,
   musicRate = 1.0,
@@ -102,6 +101,36 @@ function self.appendRecent(filepath)
   if #self.config.recent > 10 then
     table.remove(self.config.recent, 11)
   end
+  self.save()
+end
+
+local function get_location(...)
+  local params = { ... }
+  local key = table.remove(params)
+  local location = self.config
+
+  for _, v in ipairs(params) do
+    location = location[v]
+  end
+
+  return location, key
+end
+
+function self.set(value, ...)
+  local location, key = get_location(...)
+  location[key] = value
+  self.save()
+end
+
+function self.toggle(...)
+  local location, key = get_location(...)
+  
+  if type(location[key]) ~= "boolean" then
+    error("attempted to toggle a non-boolean config value: " .. table.concat({...}, '.'))
+    return
+  end
+
+  location[key] = not location[key]
   self.save()
 end
 

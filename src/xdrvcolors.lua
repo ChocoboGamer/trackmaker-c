@@ -154,7 +154,7 @@ function self.setScheme(name)
 end
 
 function self.setCustom(scheme)
-  config.config.xdrvCustomColors = {
+  config.set({
     LeftGear = fromUnity(scheme[7]):hex(),
     Column1 = fromUnity(scheme[1]):hex(),
     Column2 = fromUnity(scheme[2]):hex(),
@@ -163,7 +163,7 @@ function self.setCustom(scheme)
     Column5 = fromUnity(scheme[5]):hex(),
     Column6 = fromUnity(scheme[6]):hex(),
     RightGear = fromUnity(scheme[8]):hex(),
-  }
+  }, 'xdrvCustomColors')
   print(pretty(config.config.xdrvCustomColors))
 end
 

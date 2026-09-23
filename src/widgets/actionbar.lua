@@ -34,8 +34,7 @@ local glyphListEntries = {}
 table.insert(glyphListEntries, {
   'None',
   click = function()
-    config.config.controllerGlyphs = ''
-    config.save()
+    config.set('', 'controllerGlyphs')
     events.redraw()
   end,
   toggle = true,
@@ -45,8 +44,7 @@ for _, layout in ipairs(glyphsList) do
   table.insert(glyphListEntries, {
     titleCase(layout),
     click = function()
-      config.config.controllerGlyphs = layout
-      config.save()
+      config.set(layout, 'controllerGlyphs')
       events.redraw()
     end,
     toggle = true,
@@ -60,8 +58,7 @@ for _, theme in ipairs(colors.getSchemes()) do
     theme.name,
     click = function()
       colors.setScheme(theme.key)
-      config.config.theme = theme.key
-      config.save()
+      config.set(theme.key, 'theme')
     end,
     toggle = true,
     value = function() return colors.getScheme() == theme.key end
@@ -80,7 +77,6 @@ local function toggle(t)
   entry.click = function()
     local new = not t.get()
     t.set(new)
-    config.save()
     events.redraw()
     if t.callback then t.callback(new) end
   end
@@ -198,26 +194,25 @@ ActionBarWidget.barItems = {
   { 'View',
     {
       toggle { 'Preview mode', get = function() return config.config.previewMode end, set = function(v)
-        config.config.previewMode =
-            v
+        config.set(v, 'previewMode')
       end },
-      toggle { 'CMod', get = function() return config.config.cmod end, set = function(v) config.config.cmod = v end },
+      toggle { 'CMod', get = function() return config.config.cmod end, set = function(v) config.set(v, 'cmod') end },
       { 'Controller glyphs...', glyphListEntries },
       { 'View...', {
         toggle { 'Chart',
           get = function() return config.config.view.chart end,
-          set = function(v) config.config.view.chart = v end },
+          set = function(v) config.set(v, 'view', 'chart') end },
         toggle { 'Drifts',
           get = function() return config.config.view.drifts end,
-          set = function(v) config.config.view.drifts = v end },
+          set = function(v) config.set(v, 'view', 'drifts') end },
         toggle { 'Checkpoints',
           get = function() return config.config.view.checkpoints end,
-          set = function(v) config.config.view.checkpoints = v end },
+          set = function(v) config.set(v, 'view', 'checkpoints') end },
         toggle { 'Unsupported events',
           get = function() return config.config.view.invalidEvents end,
           set = function(v)
+            config.set(v, 'view', 'invalidEvents')
             events.onEventsModify()
-            config.config.view.invalidEvents = v
           end },
       } },
     }
@@ -295,21 +290,21 @@ ActionBarWidget.barItems = {
   { 'Options', {
     toggleVerbose { 'Beat tick',
       get = function() return config.config.beatTick end,
-      set = function(v) config.config.beatTick = v end,
+      set = function(v) config.set(v, 'beatTick') end,
       bind = keybinds.binds.beatTick },
     toggleVerbose { 'Note tick',
       get = function() return config.config.noteTick end,
-      set = function(v) config.config.noteTick = v end,
+      set = function(v) config.set(v, 'noteTick') end,
       bind = keybinds.binds.noteTick },
     {},
     {
       'VSync',
       click = function()
         local newVsync = 1 - love.window.getVSync()
-        logs.log('VSync: ' .. ((newVsync == 1) and 'ON' or 'OFF'))
+        local is_enabled = newVsync == 1
+        logs.log('VSync: ' .. (is_enabled and 'ON' or 'OFF'))
         love.window.setVSync(newVsync)
-        config.config.vsync = newVsync == 1
-        config.save()
+        config.set(is_enabled, 'vsync')
       end,
       toggle = true,
       value = function() return love.window.getVSync() == 1 end
@@ -317,7 +312,7 @@ ActionBarWidget.barItems = {
     {
       'Disable multithreading',
       click = function()
-        config.config.noMultithreading = not config.config.noMultithreading
+        config.toggle('noMultithreading')
         logs.log('Multithreading: ' .. (config.config.noMultithreading and 'OFF' or 'ON'))
         if config.config.noMultithreading then
           logs.log('Only touch this if you know what you\'re doing!')
@@ -330,7 +325,7 @@ ActionBarWidget.barItems = {
     {
       'Enable modfile preview',
       click = function()
-        config.config.enableModFilePreview = not config.config.enableModFilePreview
+        config.toggle('enableModFilePreview')
         logs.log('Modfile Preview: ' .. (config.config.enableModFilePreview and 'ON' or 'OFF'))
         if config.config.enableModFilePreview then
           logs.log('NOTICE: Modfile Preview is a heavy WIP and may not work correctly for all modfiles.')
@@ -353,10 +348,9 @@ ActionBarWidget.barItems = {
             table.insert(entries, {
               font,
               click = function()
-                config.config.uiFont = font
+                config.set(font, 'uiFont')
                 initFonts()
                 events.redraw()
-                config.save()
               end,
               representedFile = realDir,
               toggle = true,
@@ -370,7 +364,6 @@ ActionBarWidget.barItems = {
             click = function()
               initFonts()
               events.redraw()
-              config.save()
             end,
             representedFile = string.sub(config.config.uiFont, 8),
             toggle = true,
@@ -397,10 +390,9 @@ ActionBarWidget.barItems = {
                   logs.log('LÖVE support for .otf files is experimental, some features may not be supported')
                 end
 
-                config.config.uiFont = 'file://' .. path
+                config.set('file://' .. path, 'uiFont')
                 initFonts()
                 events.redraw()
-                config.save()
               end, true)
           end
         })
@@ -412,10 +404,9 @@ ActionBarWidget.barItems = {
           set = function(a)
             local fontSize = round(minFontSize + a * (maxFontSize - minFontSize))
             if fontSize ~= config.config.uiFontSize then
-              config.config.uiFontSize = fontSize
+              config.set(fontSize, 'uiFontSize')
               initFonts()
               events.redraw()
-              config.save()
             end
           end,
           formatValue = function(a)
@@ -438,9 +429,8 @@ ActionBarWidget.barItems = {
             theme.name,
             click = function()
               xdrvColors.setScheme(theme.name)
-              config.config.xdrvColors = theme.name
+              config.set(theme.name, 'xdrvColors')
               events.redraw()
-              config.save()
             end,
             toggle = true,
             value = function() return xdrvColors.scheme.name == theme.name end
@@ -454,9 +444,8 @@ ActionBarWidget.barItems = {
           'Custom',
           click = function()
             xdrvColors.setScheme('custom')
-            config.config.xdrvColors = 'custom'
+            config.set('custom', 'xdrvColors')
             events.redraw()
-            config.save()
           end,
           toggle = true,
           value = function() return xdrvColors.scheme.name == 'Custom' end
@@ -479,9 +468,8 @@ ActionBarWidget.barItems = {
                 xdrvColors.setCustom(data.Colors)
                 xdrvColors.setScheme('custom')
 
-                config.config.xdrvColors = 'custom'
+                config.set('custom', 'xdrvColors')
                 events.redraw()
-                config.save()
               end, true)
           end
         })
@@ -492,13 +480,13 @@ ActionBarWidget.barItems = {
     {
       'Waveform (EXPERIMENTAL)',
       click = function()
-        config.config.waveform = not config.config.waveform
+        config.toggle('waveform')
         if config.config.waveform and conductor.fileData then
           waveform.init(conductor.fileData)
         else
           waveform.clear()
+          events.redraw()
         end
-        config.save()
       end,
       toggle = true,
       value = function() return config.config.waveform end
@@ -506,11 +494,10 @@ ActionBarWidget.barItems = {
     {
       'Double-res waveform',
       click = function()
-        config.config.doubleResWaveform = not config.config.doubleResWaveform
+        config.toggle('doubleResWaveform')
         if config.config.waveform and conductor.fileData then
           waveform.init(conductor.fileData)
         end
-        config.save()
       end,
       toggle = true,
       value = function() return config.config.doubleResWaveform end
@@ -518,7 +505,7 @@ ActionBarWidget.barItems = {
     {
       'Waveform opacity',
       set = function(value)
-        config.config.waveformOpacity = value
+        config.set(value, 'waveformOpacity')
       end,
       slider = true,
       value = function() return config.config.waveformOpacity end
@@ -526,7 +513,7 @@ ActionBarWidget.barItems = {
     {
       'Waveform brightness',
       set = function(value)
-        config.config.waveformBrightness = value
+        config.set(value, 'waveformBrightness')
       end,
       slider = true,
       value = function() return config.config.waveformBrightness end
@@ -549,11 +536,11 @@ ActionBarWidget.barItems = {
     {
       'Disable native macOS menu',
       click = function()
-        config.config.disableNativeMacOSBar = not config.config.disableNativeMacOSBar
-        config.save()
+        config.toggle('disableNativeMacOSBar')
         logs.warn('Restart required to take effect')
       end,
       toggle = true,
+      disabled = function() return not MACOS end,
       value = function() return config.config.disableNativeMacOSBar end
     },
   },
