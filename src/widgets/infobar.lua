@@ -32,8 +32,10 @@ function InfobarWidget:reloadAssets()
 end
 
 function InfobarWidget:drawFrame()
+  if not chart.loaded then return end
+
   local footerFields = {
-    { 'Difficulty', chart.loaded and (xdrv.formatDifficulty(chart.metadata.chartDifficulty) .. ' ' .. chart.metadata.chartLevel) or '' },
+    { 'Difficulty', xdrv.formatDifficulty(chart.metadata.chartDifficulty) .. ' ' .. chart.metadata.chartLevel },
     { 'Snap',       formatSnap(edit.quantIndex) },
     { 'Beat',       string.format('%.3f', conductor.beat) },
     { 'Time',       formatTime(conductor.time) },
