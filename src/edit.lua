@@ -333,6 +333,7 @@ function self.deleteSelection()
       table.remove(chart.chart, i)
     end
   end
+  events.redraw()
 end
 
 function self.deleteKey()
