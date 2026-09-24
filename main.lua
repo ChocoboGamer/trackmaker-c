@@ -203,8 +203,14 @@ function love.draw()
 
     love.graphics.setFont(fonts.inter_12)
 
+    local ordered = {}
+
+    for _, bind in pairs(keybinds.binds) do
+      ordered[bind.idx] = bind
+    end
+
     local y = 24 + getTopPadding()
-    for name, bind in pairs(keybinds.binds) do
+    for _, bind in ipairs(ordered) do
       if bind.name then
         love.graphics.print(keybinds.formatBind(bind) .. ' - ' .. bind.name, 16, y)
       end
