@@ -1,19 +1,20 @@
-local Container           = require 'src.ui.container'
-local Button              = require 'src.ui.button'
-local Checkmark           = require 'src.ui.checkmark'
-local Label               = require 'src.ui.label'
-local Textfield           = require 'src.ui.textfield'
-local Select              = require 'src.ui.select'
-local UIWidget            = require 'src.widgets.ui'
-local xdrv                = require 'lib.xdrv'
+local Container = require 'src.ui.container'
+local Button    = require 'src.ui.button'
+local Checkmark = require 'src.ui.checkmark'
+local Label     = require 'src.ui.label'
+local Textfield = require 'src.ui.textfield'
+local Select    = require 'src.ui.select'
+local UIWidget  = require 'src.widgets.ui'
+local xdrv      = require 'lib.xdrv'
+local logs      = require 'src.logs'
 
-local logs                = require 'src.logs'
 
 ---@class ChartSettingsWidget : UIWidget
 local ChartSettingsWidget = UIWidget:extend()
 
-local WIDTH               = 310
-local HEIGHT              = 250
+
+local WIDTH  = 310
+local HEIGHT = 250
 
 function ChartSettingsWidget:new(x, y)
   ChartSettingsWidget.super.new(self, x, y, self:getContainer())

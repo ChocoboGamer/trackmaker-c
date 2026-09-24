@@ -77,7 +77,7 @@ function initFonts()
     local path = string.sub(config.config.uiFont, 8)
     local file = loadCustomFont(path)
     if not file then
-      config.set(config.defaults.uiFont, "uiFont")
+      config.set(config.defaults.uiFont, 'uiFont')
       uiSrc = 'assets/fonts/' .. config.config.uiFont
     else
       uiSrc = file
