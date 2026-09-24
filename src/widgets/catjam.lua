@@ -30,6 +30,15 @@ local JAMMERS = {
     width = 115,
     height = 128,
     pingpong = false,
+  },
+  {
+    name = 'Chegg',
+    frames = loadSprites('assets/sprites/jammers/chegg', 8),
+    speed = 4,
+    offset = 0,
+    width = 192,
+    height = 192,
+    pingpong = false,
   }
 }
 
