@@ -135,6 +135,7 @@ ActionBarWidget.barItems = {
           chart.chart = nil
           chart.metadata = nil
           chart.loadedScripts = {}
+          events.redraw()
         end,
         disabled = notChartLoaded
       },
@@ -595,6 +596,12 @@ ActionBarWidget.barItems = {
           edit.viewBinds = not edit.viewBinds
         end,
         bind = keybinds.binds.viewBinds
+      },
+      {
+        'Open storage directory',
+        click = function()
+          os.execute("start " .. love.filesystem.getSaveDirectory())
+        end,
       },
       {},
       { 'About', click = function() openWidget(AboutWidget(150, 150)) end },
