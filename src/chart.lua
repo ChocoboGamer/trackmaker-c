@@ -147,6 +147,7 @@ function self.sort()
   -- this seems ideal for us, as the sort call here is mostly a sanity check.
   -- it's called on nearly every operation editing the chart, so having it be
   -- fast for at least most of the time is preferable
+  if not self.chart then return end
   sort.insertion_sort(self.chart, function(a, b) return a and b and a.beat < b.beat end)
 end
 
