@@ -123,6 +123,9 @@ function Widget:testPoint(x, y)
   return WidgetPointState.None
 end
 
+function Widget:clickAll(x, y, button)
+end
+
 function Widget:click(x, y, button)
 end
 
@@ -310,6 +313,9 @@ end
 function self.mousepressed(x, y, button)
   for i = #widgets, 1, -1 do
     local widget = widgets[i]
+
+    widget:clickAll(x, y, button)
+    self.update()
 
     local res = widget:testPoint(x, y)
 

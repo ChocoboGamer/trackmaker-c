@@ -110,7 +110,7 @@ function ContextWidget:getElemY(elem)
   return y
 end
 
-function ContextWidget:close()
+function ContextWidget:closeUp()
   local ctx = self
   while ctx do
     ctx.delete = true
@@ -118,9 +118,17 @@ function ContextWidget:close()
   end
 end
 
+function ContextWidget:closeDown()
+  local ctx = self
+  while ctx do
+    ctx.delete = true
+    ctx = ctx.child
+  end
+end
+
 function ContextWidget:loseFocus(to)
   if to ~= self.child and to ~= self.parent and to ~= self then
-    self:close()
+    self:closeUp()
   end
 end
 
@@ -180,7 +188,7 @@ function ContextWidget:click(x, y, button)
   if entry[2] and not entry.disabled and not entry.slider then
     local res = entry[2](self)
     if not res then
-      self:close()
+      self:closeUp()
     end
   end
 end

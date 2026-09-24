@@ -728,6 +728,15 @@ function ActionBarWidget:move(x, y)
   end
 end
 
+function ActionBarWidget:clickAll(x, y, button)
+  if y > HEIGHT and self.open then
+    self.open.delete = true
+    self.open:closeDown()
+    self.open = nil
+    self.openIdx = nil
+  end
+end
+
 function ActionBarWidget:click(x, y, button)
   if button ~= 1 then return end
   self:mouse(x, y, true)
