@@ -281,6 +281,15 @@ function M.pause()
   M.playing = false
 end
 
+function M.toggle()
+  if not song then return end
+  if M.playing then
+    M.pause()
+  else
+    M.play()
+  end
+end
+
 function M.getDuration()
   if not song then return M.lastSec end
   return song:getDuration()

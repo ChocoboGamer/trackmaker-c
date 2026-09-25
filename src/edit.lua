@@ -59,6 +59,19 @@ local function getBeat()
 end
 local function setBeat(b)
   conductor.seekBeats(quantize(b, self.quantIndex))
+  self.updateGhosts()
+  conductor.initStates()
+end
+function self.moveByQuant(mult)
+  setBeat(conductor.beat + QUANTS[self.quantIndex] * mult)
+end
+
+function self.move(beat)
+  setBeat(conductor.beat + beat)
+end
+
+function self.setQuantIndex(idx)
+  self.quantIndex = math.min(math.max(idx, 1), #QUANTS)
   events.redraw()
 end
 
@@ -103,6 +116,8 @@ end
 
 ---@param column XDRVNoteColumn
 function self.beginNote(column)
+  if not self.write then return end
+
   self.clearSelection()
 
   local beat = getBeat()
@@ -118,7 +133,8 @@ function self.beginNote(column)
       table.insert(ghosts, thing)
     end
     if mode == self.Mode.Append then
-      setBeat(beat + QUANTS[self.quantIndex])
+      self.endNote(column)
+      self.move(QUANTS[self.quantIndex])
     end
   elseif mode == self.Mode.Rewrite then
     local thing = { beat = beat, note = {} }
@@ -145,6 +161,8 @@ end
 
 ---@param lane XDRVLane
 function self.beginGearShift(lane)
+  if not self.write then return end
+
   self.clearSelection()
 
   local beat = getBeat()
@@ -164,6 +182,8 @@ end
 
 ---@param dir XDRVDriftDirection
 function self.placeDrift(dir)
+  if not self.write then return end
+
   local beat = getBeat()
   local thing = { beat = beat, drift = {} }
   local thingIdx = chart.findThing(thing)
@@ -460,172 +480,5 @@ function self.paste()
 end
 
 self.setBeat = setBeat
-
----@param key love.KeyConstant
----@param code love.Scancode
-function self.keypressed(key, code, isRepeat)
-  if key == 'escape' and self.viewBinds then
-    self.viewBinds = false
-    return
-  end
-
-  local ctrl = love.keyboard.isDown('lctrl') or love.keyboard.isDown('rctrl')
-  if MACOS then
-    ---@diagnostic disable-next-line: param-type-mismatch
-    ctrl = love.keyboard.isDown('lgui') or love.keyboard.isDown('rgui')
-  end
-  local shift = love.keyboard.isDown('lshift') or love.keyboard.isDown('rshift')
-
-  ---@type Keybind[]
-  local triggeredKeybinds = {}
-  for _, bind in pairs(keybinds.binds) do
-    if
-        not (bind.ctrl and not ctrl) and
-        not (bind.shift and not shift) and
-        not (bind.viewOnly and self.write) and
-        not (bind.writeOnly and not self.write) and
-        not (not bind.canRepeat and isRepeat) and
-        not (not bind.alwaysUsable and self.viewBinds)
-    then
-      local isInvalid = false
-      for _, k in ipairs(bind.keys or {}) do
-        if not love.keyboard.isScancodeDown(k) then
-          isInvalid = true
-          break
-        end
-      end
-      for _, k in ipairs(bind.keyCodes or {}) do
-        if not love.keyboard.isDown(k) then
-          isInvalid = true
-          break
-        end
-      end
-      if not bind.keys and not bind.keyCodes then isInvalid = true end
-
-      if not isInvalid then
-        table.insert(triggeredKeybinds, bind)
-      end
-    end
-  end
-
-  if #triggeredKeybinds <= 1 then
-    local bind = triggeredKeybinds[1]
-    if bind and bind.trigger then bind.trigger() end
-    if bind then return end
-  else
-    -- resolve via priority
-    local maxPrio = 0
-    local maxBind
-    for _, bind in ipairs(triggeredKeybinds) do
-      local prio = 0
-      if bind.shift then prio = prio + 2 end
-      if bind.ctrl then prio = prio + 2 end
-      if bind.keys then prio = prio + #bind.keys end
-      if bind.keyCodes then prio = prio + #bind.keyCodes end
-      if prio > maxPrio then
-        maxPrio = prio
-        maxBind = bind
-      end
-    end
-
-    if maxBind.trigger then maxBind.trigger() end
-    return
-  end
-
-  if self.viewBinds then return end
-
-  if key == 'space' then
-    if conductor.isPlaying() then
-      conductor.pause()
-    else
-      conductor.play()
-    end
-  elseif key == 'down' then
-    setBeat(conductor.beat - QUANTS[self.quantIndex])
-    self.updateGhosts()
-    conductor.initStates()
-  elseif key == 'up' then
-    setBeat(conductor.beat + QUANTS[self.quantIndex])
-    self.updateGhosts()
-    conductor.initStates()
-  elseif key == 'pagedown' then
-    setBeat(conductor.beat - 4)
-    self.updateGhosts()
-    conductor.initStates()
-  elseif key == 'pageup' then
-    setBeat(conductor.beat + 4)
-    self.updateGhosts()
-    conductor.initStates()
-  elseif key == 'left' then
-    self.quantIndex = math.max(self.quantIndex - 1, 1)
-    events.redraw()
-  elseif key == 'right' then
-    self.quantIndex = math.min(self.quantIndex + 1, #QUANTS)
-    events.redraw()
-  end
-
-  if isRepeat then return end
-
-  if self.write then
-    if code == 'lshift' then
-      self.beginGearShift(xdrv.XDRVLane.Left)
-    elseif code == 'a' or code == '1' then
-      self.beginNote(1)
-    elseif code == 's' or code == '2' then
-      self.beginNote(2)
-    elseif code == 'd' or code == '3' then
-      self.beginNote(3)
-    elseif code == 'l' or code == '4' then
-      self.beginNote(4)
-    elseif code == ';' or code == '5' then
-      self.beginNote(5)
-    elseif code == '\'' or code == '6' then
-      self.beginNote(6)
-    elseif code == 'rshift' then
-      self.beginGearShift(xdrv.XDRVLane.Right)
-    elseif code == ',' then
-      self.placeDrift(xdrv.XDRVDriftDirection.Left)
-    elseif code == '.' then
-      self.placeDrift(xdrv.XDRVDriftDirection.Right)
-    elseif code == '/' then
-      self.placeDrift(xdrv.XDRVDriftDirection.Neutral)
-    end
-  else
-    if
-        code == 'a' or code == '1' or
-        code == 's' or code == '2' or
-        code == 'd' or code == '3' or
-        code == 'l' or code == '4' or
-        code == ';' or code == '5' or
-        code == '\'' or code == '6'
-    then
-      logs.log('You must be in write mode to do this! (Press ' .. keybinds.formatBind(keybinds.binds.cycleMode) .. ')')
-    end
-  end
-end
-
----@param key love.KeyConstant
----@param code love.Scancode
-function self.keyreleased(key, code)
-  if self.write and #ghosts > 0 then
-    if code == 'lshift' then
-      self.endGearShift(xdrv.XDRVLane.Left)
-    elseif code == 'a' or code == '1' then
-      self.endNote(1)
-    elseif code == 's' or code == '2' then
-      self.endNote(2)
-    elseif code == 'd' or code == '3' then
-      self.endNote(3)
-    elseif code == 'l' or code == '4' then
-      self.endNote(4)
-    elseif code == ';' or code == '5' then
-      self.endNote(5)
-    elseif code == '\'' or code == '6' then
-      self.endNote(6)
-    elseif code == 'rshift' then
-      self.endGearShift(xdrv.XDRVLane.Right)
-    end
-  end
-end
 
 return self

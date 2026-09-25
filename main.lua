@@ -279,12 +279,12 @@ function love.keypressed(key, scancode, isrepeat)
     return
   end
   if widgets.eatsInputs() then return end
-  edit.keypressed(key, scancode, isrepeat)
+  keybinds.keypressed(key, scancode, isrepeat)
 end
 
 function love.keyreleased(key, scancode)
   if widgets.eatsInputs() then return end
-  edit.keyreleased(key, scancode)
+  keybinds.keyreleased(key, scancode)
 end
 
 function love.wheelmoved(ox, oy)
