@@ -388,8 +388,7 @@ function M.update(dt)
     end
 
     if num_tick > 0 then
-      print('playing tick with volume: ', num_tick)
-      noteTickSFX:play(1 - 0.3 ^ num_tick)
+      noteTickSFX:play(math.min(0.5 * num_tick, 1))
     end
   end
   M.updateBeat()
