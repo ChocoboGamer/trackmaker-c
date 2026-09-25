@@ -104,10 +104,11 @@ local function beatToY(b, sh)
     (conductor.timeAtBeat(b) - conductor.time) * getScaledScrollSpeed() * BASE_SCALE
   else
     return (sh or love.graphics.getHeight()) - getPadBottom() -
-    (b - conductor.beat) * getScaledScrollSpeed() * BASE_SCALE
+        (b - conductor.beat) * getScaledScrollSpeed() * BASE_SCALE
   end
 end
 self.beatToY = beatToY
+
 ---@param y number
 ---@param sh number?
 local function yToBeat(y, sh)
@@ -223,7 +224,8 @@ local function drawCheckpoint(thing, sh)
       'right')
     love.graphics.setColor(1, 1, 1, 0.5)
     love.graphics.setFont(fonts.inter_12)
-    love.graphics.printf('Checkpoint', math.floor(x - 8 - width - 256), math.floor(y - fonts.inter_12:getHeight() / 2 - 8),
+    love.graphics.printf('Checkpoint', math.floor(x - 8 - width - 256),
+      math.floor(y - fonts.inter_12:getHeight() / 2 - 8),
       256, 'right')
   end
 end
@@ -1217,8 +1219,8 @@ function self.drawPost()
 
   if selectionX and selectionY then
     local mx, my = love.mouse.getPosition()
-    local x1, y1, x2, y2 = math.min(selectionX, mx), math.min(selectionY, my), math.max(selectionX, mx),
-        math.max(selectionY, my)
+    local x1, y1, x2, y2 = math.min(selectionX, mx), math.min(beatToY(selectionY), my), math.max(selectionX, mx),
+        math.max(beatToY(selectionY), my)
 
     love.graphics.setColor(1, 1, 1, 0.2)
     love.graphics.rectangle('fill', x1, y1, x2 - x1, y2 - y1)
@@ -1301,8 +1303,8 @@ function self.mousepressed(x, y, button)
     return
   end
 
-  if not edit.write and button == 1 and chart.loaded then
-    selectionX, selectionY = x, y
+  if button == 1 and chart.loaded then
+    selectionX, selectionY = x, yToBeat(y)
     return
   end
 
@@ -1325,8 +1327,8 @@ end
 function self.mousereleased(x, y, button)
   if not chart.loaded then return end
   if button == 1 and selectionX and selectionY then
-    local x1, y1, x2, y2 = math.min(selectionX, x), math.min(selectionY, y), math.max(selectionX, x),
-        math.max(selectionY, y)
+    local x1, y1, x2, y2 = math.min(selectionX, x), math.min(beatToY(selectionY), y), math.max(selectionX, x),
+        math.max(beatToY(selectionY), y)
     selectionX, selectionY = nil, nil
 
     if math.abs(x2 - x1) < 4 and math.abs(y2 - y1) < 4 then
@@ -1354,7 +1356,7 @@ function self.mousereleased(x, y, button)
         local gear = thing.gearShift
 
         local x = ((gear.lane == xdrv.XDRVLane.Left) and (getLeft() + getMLeft()) / 2 or (getRight() + getMRight()) / 2) +
-        love.graphics.getWidth() / 2
+            love.graphics.getWidth() / 2
         local y = beatToY(thing.beat)
         local yEnd = beatToY(thing.beat + gear.length)
 
