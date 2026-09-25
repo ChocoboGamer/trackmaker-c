@@ -10,8 +10,6 @@ local self      = {}
 ---@field ctrl boolean? @ cmd on Mac
 ---@field shift boolean?
 ---@field alt boolean?
----@field viewOnly boolean?
----@field writeOnly boolean?
 ---@field keys love.Scancode[]
 ---@field name string?
 ---@field canRepeat boolean?
@@ -40,7 +38,6 @@ local binds = setmetatable({}, {
 binds.new = {
   name = 'New',
   ctrl = true,
-  viewOnly = true,
   keys = { 'n' },
   trigger = function()
     chart.newChart()
@@ -49,7 +46,6 @@ binds.new = {
 binds.open = {
   name = 'Open',
   ctrl = true,
-  viewOnly = true,
   keys = { 'o' },
   trigger = function()
     chart.openChart()
@@ -181,7 +177,6 @@ binds.cycleMode = {
 binds.exitWrite = {
   name = 'Exit write mode',
   keys = { 'escape' },
-  writeOnly = true,
   trigger = function()
     if edit.viewBinds then
       edit.viewBinds = false
@@ -193,8 +188,7 @@ binds.exitWrite = {
 binds.decreaseVolume = {
   name = 'Decrease volume',
   keys = { 'down' },
-  viewOnly = true,
-  shift = true,
+  ctrl = true,
   trigger = function()
     config.set(math.max(config.config.volume - 0.05, 0), 'volume')
     logs.log('Volume set to ' .. round(config.config.volume * 100) .. '%')
@@ -203,8 +197,7 @@ binds.decreaseVolume = {
 binds.increaseVolume = {
   name = 'Increase volume',
   keys = { 'up' },
-  viewOnly = true,
-  shift = true,
+  ctrl = true,
   trigger = function()
     config.set(math.min(config.config.volume + 0.05, 1), 'volume')
     logs.log('Volume set to ' .. round(config.config.volume * 100) .. '%')
@@ -213,8 +206,7 @@ binds.increaseVolume = {
 binds.decreaseLeft = {
   name = 'Decrease speed',
   keys = { 'left' },
-  viewOnly = true,
-  shift = true,
+  ctrl = true,
   canRepeat = true,
   trigger = function()
     config.set(math.max(config.config.musicRate - 0.05, 0.1), 'musicRate')
@@ -224,8 +216,7 @@ binds.decreaseLeft = {
 binds.increaseRight = {
   name = 'Increase speed',
   keys = { 'right' },
-  viewOnly = true,
-  shift = true,
+  ctrl = true,
   canRepeat = true,
   trigger = function()
     config.set(math.min(config.config.musicRate + 0.05, 2), 'musicRate')
@@ -251,7 +242,6 @@ binds.noteTick = {
 binds.clearSelection = {
   name = 'Clear selection',
   keys = { 'escape' },
-  viewOnly = true,
   trigger = function()
     edit.clearSelection()
   end,
@@ -259,7 +249,6 @@ binds.clearSelection = {
 binds.mines = {
   name = 'Toggle mines',
   keys = { '`' },
-  viewOnly = true,
   trigger = function()
     edit.turnToMines()
   end
@@ -321,7 +310,7 @@ binds.increase_quant = {
 }
 binds.place_left_gear = {
   name = 'Place left gear',
-  keys = { 'lshift' },
+  keys = { 'lshift', 'q' },
   trigger = function()
     edit.beginGearShift(xdrv.XDRVLane.Left)
   end,
@@ -331,7 +320,7 @@ binds.place_left_gear = {
 }
 binds.place_right_gear = {
   name = 'Place right gear',
-  keys = { 'rshift' },
+  keys = { 'rshift', 'w' },
   trigger = function()
     edit.beginGearShift(xdrv.XDRVLane.Right)
   end,
@@ -401,21 +390,21 @@ binds.place_column_6 = {
 }
 binds.place_left_drift = {
   name = 'Place left drift',
-  keys = { ',' },
+  keys = { ',', 'r' },
   trigger = function()
     edit.placeDrift(xdrv.XDRVDriftDirection.Left)
   end
 }
 binds.place_right_drift = {
   name = 'Place right drift',
-  keys = { '.' },
+  keys = { '.', 'y' },
   trigger = function()
     edit.placeDrift(xdrv.XDRVDriftDirection.Right)
   end
 }
 binds.place_neutral_drift = {
   name = 'Place neutral drift',
-  keys = { '/' },
+  keys = { '/', 't'},
   trigger = function()
     edit.placeDrift(xdrv.XDRVDriftDirection.Neutral)
   end
@@ -432,8 +421,6 @@ end
 local function check_bind(bind, special, key, code, isRepeat)
   local invalid = not bind.alwaysUsable and (
     (not bind.canRepeat and isRepeat) or
-    (bind.viewOnly and edit.write) or
-    (bind.writeOnly and not edit.write) or
     (bind.ctrl and not special.ctrl) or
     (bind.shift and not special.shift) or
     (bind.alt and not special.alt) or

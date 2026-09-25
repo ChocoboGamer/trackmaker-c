@@ -80,9 +80,7 @@ function InfobarWidget:drawFrame()
 
   local mode = edit.getMode()
 
-  if mode == edit.Mode.None then
-    love.graphics.setColor(0.1, 0.1, 0.1, 0.8)
-  elseif mode == edit.Mode.Insert then
+  if mode == edit.Mode.Insert then
     love.graphics.setColor(colors.modes.insert:unpack())
   elseif mode == edit.Mode.Append then
     love.graphics.setColor(colors.modes.append:unpack())
@@ -90,7 +88,7 @@ function InfobarWidget:drawFrame()
     love.graphics.setColor(colors.modes.rewrite:unpack())
   end
   love.graphics.rectangle('fill', width + MARGIN, 0, MODE_WIDTH, self.height, ROUND, ROUND)
-  if mode == edit.Mode.None or mode == edit.Mode.Insert then
+  if mode == edit.Mode.Insert then
     love.graphics.setColor(1, 1, 1, 1)
   else
     love.graphics.setColor(0, 0, 0, 1)

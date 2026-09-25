@@ -6,19 +6,16 @@ local self      = {}
 
 ---@enum Mode
 self.Mode       = {
-  -- Technically not a mode. Implies write = false
-  None = 0,
   -- ArrowVortex-style insert mode. Press a key to set or unset a note.
-  Insert = 1,
+  Insert = 0,
   -- Move forward after adding a note.
-  Append = 2,
+  Append = 1,
   -- Move to the next row and overwrite the last after adding a note.
-  Rewrite = 3,
+  Rewrite = 2,
 }
 
 ---@param mode Mode
 function self.modeName(mode)
-  if mode == self.Mode.None then return 'None' end
   if mode == self.Mode.Insert then return 'Insert' end
   if mode == self.Mode.Append then return 'Append' end
   if mode == self.Mode.Rewrite then return 'Rewrite' end
@@ -33,24 +30,19 @@ end
 
 ---@type Mode
 local mode = self.Mode.Insert
-self.write = false
 self.quantIndex = 1
 
 self.viewBinds = false
 
 function self.cycleMode()
-  if self.write then
-    mode = mode + 1
-    if mode > self.Mode.Rewrite then
-      mode = 1
-    end
-  else
-    self.write = true
+  mode = mode + 1
+  if mode > self.Mode.Rewrite then
+    mode = 0
   end
 end
 
+---@return Mode
 function self.getMode()
-  if not self.write then return self.Mode.None end
   return mode
 end
 
@@ -116,8 +108,6 @@ end
 
 ---@param column XDRVNoteColumn
 function self.beginNote(column)
-  if not self.write then return end
-
   self.clearSelection()
 
   local beat = getBeat()
@@ -147,6 +137,7 @@ function self.beginNote(column)
     end
     local placed = { beat = beat, note = { column = column } }
     table.insert(ghosts, placed)
+    self.endNote(column)
     for i = lastIdx, #chart.chart do
       local ev = chart.chart[i]
       if ev.beat > beat then
@@ -161,8 +152,6 @@ end
 
 ---@param lane XDRVLane
 function self.beginGearShift(lane)
-  if not self.write then return end
-
   self.clearSelection()
 
   local beat = getBeat()
@@ -182,8 +171,6 @@ end
 
 ---@param dir XDRVDriftDirection
 function self.placeDrift(dir)
-  if not self.write then return end
-
   local beat = getBeat()
   local thing = { beat = beat, drift = {} }
   local thingIdx = chart.findThing(thing)
