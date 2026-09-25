@@ -162,7 +162,7 @@ binds.loadChartClipboard = {
   end
 }
 binds.sortChart = {
-  name = 'Sort chart (should fix jank)',
+  name = 'Sort chart',
   ctrl = true,
   shift = true,
   keys = { 'q' },
