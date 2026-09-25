@@ -4,3 +4,4 @@
 releases/
 .vscode/*
 changelog.txt
+platform/windows/rcedit.exe

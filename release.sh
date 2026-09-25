@@ -30,8 +30,9 @@ cp platform/universal/love-license.txt releases/trackmaker-c-win64/love-license.
 
 rm releases/trackmaker-c-win64/game.ico
 rm releases/trackmaker-c-win64/love.ico
-lua5.3 platform/windows/love-pe-wrapper.lua releases/trackmaker-c-win64/trackmaker-c.exe platform/windows/trackmaker-c.ico releases/trackmaker-c-win64/trackmaker-c-patched.exe
-mv releases/trackmaker-c-win64/trackmaker-c-patched.exe releases/trackmaker-c-win64/trackmaker-c.exe
+wine "platform/windows/rcedit.exe" "releases/trackmaker-c-win64/trackmaker-c.exe" --set-icon "platform/windows/trackmaker-c.ico"
+#lua5.3 platform/windows/love-pe-wrapper.lua releases/trackmaker-c-win64/trackmaker-c.exe platform/windows/trackmaker-c.ico releases/trackmaker-c-win64/trackmaker-c-patched.exe
+#mv releases/trackmaker-c-win64/trackmaker-c-patched.exe releases/trackmaker-c-win64/trackmaker-c.exe
 
 cd releases/trackmaker-c-win64/ || exit 1
 zip -9 "../trackmaker-c-win64-${ver}.zip" ./*
