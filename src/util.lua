@@ -124,7 +124,7 @@ function formatSnap(n)
 end
 
 ---@param str string
----@param len number
+---@param len integer
 ---@param char string?
 function lpad(str, len, char)
   char = char or ' '
@@ -328,6 +328,7 @@ function eulerToQuaternion(yaw, pitch, roll)
   local sinYawOver2 = math.sin(yawOver2)
   local cosYawOver2 = math.cos(yawOver2)
 
+  ---@diagnostic disable-next-line: undefined-field
   return cpml.quat.new(
     cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2,
     cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2,
