@@ -380,7 +380,7 @@ function M.update(dt)
         if (thing.beat + length) <= M.beat then
           chartStates[i].hitEnd = true
           onInputRelease(thing)
-          if thing.gearShift and config.config.noteTick then
+          if thing.gearShift and thing.gearShift.length ~= 0 and config.config.noteTick then
             num_tick = num_tick + 1
           end
         end
