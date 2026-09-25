@@ -21,16 +21,18 @@ icotool -c ./trackmaker-*.png > trackmaker.ico
 rm ./trackmaker-*.png
 
 echo "trackmaker.ico > platform/windows/trackmaker.ico"
+cp trackmaker.ico ../platform/windows/trackmaker-c.ico
 
 # .icns
 
 inkscape --export-type png -w 512 -h 512 "$svg" -o ./trackmaker-512.png
 # we want to pad this out by a bit, bc macos icons are smaller by default
 convert trackmaker-512.png -resize 412x412 -background transparent -gravity center -extent 512x512 trackmaker-512.png
-icnsify ./trackmaker-512.png -o ./trackmaker.icns
+icnsify -i ./trackmaker-512.png -o ./trackmaker.icns
 rm ./trackmaker-512.png
 
 echo "trackmaker.icns > platform/macos/OS X AppIcon.icns"
+cp trackmaker.icns "../platform/macos/OS X AppIcon.icns"
 
 # application
 
@@ -38,3 +40,6 @@ inkscape --export-type png -w 256 -h 256 "$svg" -o ./trackmaker-icon.png
 
 echo "trackmaker-icon.png > assets/sprites/trackmaker-icon.png"
 echo "trackmaker-icon.png > platform/linux/desktop/trackmaker.png"
+
+cp trackmaker-icon.png ../assets/sprites/trackmaker-icon.png
+cp trackmaker-icon.png ../platform/linux/desktop/trackmaker-c.png

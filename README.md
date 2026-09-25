@@ -1,4 +1,4 @@
-# trackmaker
+# trackmaker-c
 
 ![](docs/screenshot-1.png)
 
@@ -68,8 +68,8 @@ This project would not be possible without these projects:
 - [LÖVE](https://love2d.org/) _(zlib + [dependency licenses](https://github.com/love2d/love/blob/6807e54bab3a080b7ac3f75ac8c02d1c00fd8f67/license.txt))_
 - [json.lua](https://github.com/rxi/json.lua) _(licensed under [MIT](https://github.com/rxi/json.lua/blob/dbf4b2dd2eb7c23be2773c89eb059dadd6436f94/LICENSE))_
 - [classic](https://github.com/rxi/classic) _(licensed under [MIT](https://github.com/rxi/classic/blob/e5610756c98ac2f8facd7ab90c94e1a097ecd2c6/LICENSE))_
-- [Vexatos](https://github.com/Vexatos)'s fork of
-[nativefiledialog](https://github.com/Vexatos/nativefiledialog) _(licensed under [zlib](https://github.com/Vexatos/nativefiledialog/blob/bea4560b9269bdc142fef946ccd8682450748958/LICENSE))_
+- [btzys](https://github.com/btzys)' fork of
+[nativefiledialog](https://github.com/btzy/nativefiledialog-extended) _(licensed under [zlib](https://github.com/btzy/nativefiledialog-extended/blob/master/LICENSE))_
 - [deep](https://github.com/Nikaoto/deep), slightly tweaked _(licensed under [MIT](https://github.com/Nikaoto/deep/blob/a948f7724a3772fbb5d539ed06d828e64eceaa7b/LICENSE))_
 - [Cirno's Perfect Math Library](https://github.com/excessive/cpml) _([Mixed license](https://github.com/excessive/cpml/blob/eb209f6d9111625d8e0e8a32dafb4a0aed12a84e/LICENSE.md))_
 - [sort.lua](https://github.com/1bardesign/batteries/blob/master/sort.lua) from [batteries](https://github.com/1bardesign/batteries) _(licensed under MIT)_
@@ -82,6 +82,7 @@ nativefiledialog handling code is stolen from them. Thank you very much!
 And these people:
 
 - [Foodbot](https://foodbot.carrd.co) - the trackmaker logo
+- [Kaypooma](https://youtube.com/@kaypooma) - the trackmaker-c logo edit
 - [tari](https://github.com/tari-cat), [riley](https://github.com/rilegoat), and
 the rest of the [EX-XDRiVER team](https://xdrv.team). Thank you!
 

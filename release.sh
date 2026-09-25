@@ -8,14 +8,8 @@ set -euo pipefail
 # nfd_linux.so
 
 nfd_windows=nfd.dll
-nfd_mac=nfd.so
+nfd_mac=nfd.dylib
 nfd_linux=nfd.so
-if [ -f "nfd_mac.so" ]; then
-  nfd_mac=nfd_mac.so
-fi
-if [ -f "nfd_linux.so" ]; then
-  nfd_linux=nfd_linux.so
-fi
 
 ver=$(lua -e 'love = {}; require "conf"; local t = { window = {}, modules = {}, releases = {} }; love.conf(t); print(t.releases.version)')
 echo "releasing ver ${ver}"
@@ -24,66 +18,66 @@ love-release -W 64 -M
 
 # windows
 
-rm -f releases/trackmaker-win64-*.zip
+rm -f releases/trackmaker-c-win64-*.zip
 
-mkdir -p releases/trackmaker-win64
-unzip releases/trackmaker-win64.zip -d releases/
-rm releases/trackmaker-win64.zip
+mkdir -p releases/trackmaker-c-win64
+unzip releases/trackmaker-c-win64.zip -d releases/
+rm releases/trackmaker-c-win64.zip
 
-cp "$nfd_windows" releases/trackmaker-win64/nfd.dll
-cp LICENSE.txt releases/trackmaker-win64/license.txt
-cp platform/universal/love-license.txt releases/trackmaker-win64/love-license.txt
+cp "$nfd_windows" releases/trackmaker-c-win64/nfd.dll
+cp LICENSE.txt releases/trackmaker-c-win64/license.txt
+cp platform/universal/love-license.txt releases/trackmaker-c-win64/love-license.txt
 
-rm releases/trackmaker-win64/game.ico
-rm releases/trackmaker-win64/love.ico
-lua platform/windows/love-pe-wrapper.lua releases/trackmaker-win64/trackmaker.exe platform/windows/trackmaker.ico releases/trackmaker-win64/trackmaker-patched.exe
-mv releases/trackmaker-win64/trackmaker-patched.exe releases/trackmaker-win64/trackmaker.exe
+rm releases/trackmaker-c-win64/game.ico
+rm releases/trackmaker-c-win64/love.ico
+lua5.3 platform/windows/love-pe-wrapper.lua releases/trackmaker-c-win64/trackmaker-c.exe platform/windows/trackmaker-c.ico releases/trackmaker-c-win64/trackmaker-c-patched.exe
+mv releases/trackmaker-c-win64/trackmaker-c-patched.exe releases/trackmaker-c-win64/trackmaker-c.exe
 
-cd releases/trackmaker-win64/ || exit 1
-zip -9 "../trackmaker-win64-${ver}.zip" ./*
+cd releases/trackmaker-c-win64/ || exit 1
+zip -9 "../trackmaker-c-win64-${ver}.zip" ./*
 cd ../../
-rm -r releases/trackmaker-win64
+rm -r releases/trackmaker-c-win64
 
 # mac
 
-rm -f releases/trackmaker-macos-*.zip
+rm -f releases/trackmaker-c-macos-*.zip
 
-unzip releases/trackmaker-macos.zip -d releases/
-rm releases/trackmaker-macos.zip
+unzip releases/trackmaker-c-macos.zip -d releases/
+rm releases/trackmaker-c-macos.zip
 
-cp "$nfd_mac" releases/trackmaker.app/Contents/Resources/nfd.so
-cp platform/universal/love-license.txt releases/trackmaker.app/Contents/Resources/
-cp LICENSE.txt releases/trackmaker.app/Contents/Resources/license.txt
-cp platform/macos/Info.plist releases/trackmaker.app/Contents/
-sed -i "s~{VERSION}~$ver~" releases/trackmaker.app/Contents/Info.plist
-cp "platform/macos/OS X AppIcon.icns" releases/trackmaker.app/Contents/Resources/
-rm releases/trackmaker.app/Contents/Resources/GameIcon.icns
-rm releases/trackmaker.app/Contents/Resources/Assets.car
-cp platform/macos/trackmaker releases/trackmaker.app/Contents/MacOS/
+cp "$nfd_mac" releases/trackmaker-c.app/Contents/Resources/nfd.dylib
+cp platform/universal/love-license.txt releases/trackmaker-c.app/Contents/Resources/
+cp LICENSE.txt releases/trackmaker-c.app/Contents/Resources/license.txt
+cp platform/macos/Info.plist releases/trackmaker-c.app/Contents/
+sed -i "s~{VERSION}~$ver~" releases/trackmaker-c.app/Contents/Info.plist
+cp "platform/macos/OS X AppIcon.icns" releases/trackmaker-c.app/Contents/Resources/
+rm releases/trackmaker-c.app/Contents/Resources/GameIcon.icns
+rm releases/trackmaker-c.app/Contents/Resources/Assets.car
+cp platform/macos/trackmaker-c releases/trackmaker-c.app/Contents/MacOS/
 
 cd releases/ || exit 1
-zip -r9 "trackmaker-macos-${ver}.zip" trackmaker.app
+zip -r9 "trackmaker-c-macos-${ver}.zip" trackmaker-c.app
 cd ../
-rm -r releases/trackmaker.app/
+rm -r releases/trackmaker-c.app/
 
 # linux
 
-rm -f releases/trackmaker-linux-*.zip
+rm -f releases/trackmaker-c-linux-*.zip
 
-mkdir -p releases/trackmaker-linux
+mkdir -p releases/trackmaker-c-linux
 
-cp "$nfd_linux" releases/trackmaker-linux/nfd.so
-cp releases/trackmaker.love releases/trackmaker-linux/
-cp -r platform/linux/* releases/trackmaker-linux/
-cp LICENSE.txt releases/trackmaker-linux/license.txt
-cp platform/universal/love-license.txt releases/trackmaker-linux/love-license.txt
+cp "$nfd_linux" releases/trackmaker-c-linux/nfd.so
+cp releases/trackmaker-c.love releases/trackmaker-c-linux/
+cp -r platform/linux/* releases/trackmaker-c-linux/
+cp LICENSE.txt releases/trackmaker-c-linux/license.txt
+cp platform/universal/love-license.txt releases/trackmaker-c-linux/love-license.txt
 
-cd "releases/trackmaker-linux/" || exit 1
-zip -r9 "../trackmaker-linux-${ver}.zip" ./*
+cd "releases/trackmaker-c-linux/" || exit 1
+zip -r9 "../trackmaker-c-linux-${ver}.zip" ./*
 cd ../../
-rm -r releases/trackmaker-linux
+rm -r releases/trackmaker-c-linux
 
 # love
 
-rm -f releases/trackmaker-*.love
-cp releases/trackmaker.love "releases/trackmaker-${ver}.love"
+rm -f releases/trackmaker-c-*.love
+cp releases/trackmaker-c.love "releases/trackmaker-c-${ver}.love"
