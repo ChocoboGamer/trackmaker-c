@@ -341,7 +341,7 @@ binds.place_right_gear = {
 }
 binds.place_column_1 = {
   name = 'Place column 1 note',
-  keys = { '1' },
+  keys = { '1', 'a' },
   trigger = function()
     edit.beginNote(1)
   end,
@@ -351,7 +351,7 @@ binds.place_column_1 = {
 }
 binds.place_column_2 = {
   name = 'Place column 2 note',
-  keys = { '2' },
+  keys = { '2', 's' },
   trigger = function()
     edit.beginNote(2)
   end,
@@ -361,7 +361,7 @@ binds.place_column_2 = {
 }
 binds.place_column_3 = {
   name = 'Place column 3 note',
-  keys = { '3' },
+  keys = { '3', 'd' },
   trigger = function()
     edit.beginNote(3)
   end,
@@ -371,7 +371,7 @@ binds.place_column_3 = {
 }
 binds.place_column_4 = {
   name = 'Place column 4 note',
-  keys = { '4' },
+  keys = { '4', 'l'},
   trigger = function()
     edit.beginNote(4)
   end,
@@ -381,7 +381,7 @@ binds.place_column_4 = {
 }
 binds.place_column_5 = {
   name = 'Place column 5 note',
-  keys = { '5' },
+  keys = { '5', ';' },
   trigger = function()
     edit.beginNote(5)
   end,
@@ -391,7 +391,7 @@ binds.place_column_5 = {
 }
 binds.place_column_6 = {
   name = 'Place column 6 note',
-  keys = { '6' },
+  keys = { '6', '\'' },
   trigger = function()
     edit.beginNote(6)
   end,
@@ -509,9 +509,12 @@ function self.formatBind(bind)
     segments = newSegments
   end
 
+  local keys = {}
   for _, key in ipairs(bind.keys) do
-    table.insert(segments, formatKey(key))
+    table.insert(keys, formatKey(key))
   end
+  table.insert(segments, table.concat(keys, ' | '))
+
   return table.concat(segments, MACOS and '' or '+')
 end
 
