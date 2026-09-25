@@ -425,37 +425,37 @@ end
 -- @treturn mat4 out
 function mat4.invert(out, a)
   tm4[1]    = a[6] * a[11] * a[16] - a[6] * a[12] * a[15] - a[10] * a[7] * a[16] + a[10] * a[8] * a[15] +
-  a[14] * a[7] * a[12] - a[14] * a[8] * a[11]
+      a[14] * a[7] * a[12] - a[14] * a[8] * a[11]
   tm4[2]    = -a[2] * a[11] * a[16] + a[2] * a[12] * a[15] + a[10] * a[3] * a[16] - a[10] * a[4] * a[15] -
-  a[14] * a[3] * a[12] + a[14] * a[4] * a[11]
+      a[14] * a[3] * a[12] + a[14] * a[4] * a[11]
   tm4[3]    = a[2] * a[7] * a[16] - a[2] * a[8] * a[15] - a[6] * a[3] * a[16] + a[6] * a[4] * a[15] + a[14] * a[3] * a
-  [8] - a[14] * a[4] * a[7]
+      [8] - a[14] * a[4] * a[7]
   tm4[4]    = -a[2] * a[7] * a[12] + a[2] * a[8] * a[11] + a[6] * a[3] * a[12] - a[6] * a[4] * a[11] -
-  a[10] * a[3] * a[8] + a[10] * a[4] * a[7]
+      a[10] * a[3] * a[8] + a[10] * a[4] * a[7]
   tm4[5]    = -a[5] * a[11] * a[16] + a[5] * a[12] * a[15] + a[9] * a[7] * a[16] - a[9] * a[8] * a[15] -
-  a[13] * a[7] * a[12] + a[13] * a[8] * a[11]
+      a[13] * a[7] * a[12] + a[13] * a[8] * a[11]
   tm4[6]    = a[1] * a[11] * a[16] - a[1] * a[12] * a[15] - a[9] * a[3] * a[16] + a[9] * a[4] * a[15] +
-  a[13] * a[3] * a[12] - a[13] * a[4] * a[11]
+      a[13] * a[3] * a[12] - a[13] * a[4] * a[11]
   tm4[7]    = -a[1] * a[7] * a[16] + a[1] * a[8] * a[15] + a[5] * a[3] * a[16] - a[5] * a[4] * a[15] -
-  a[13] * a[3] * a[8] + a[13] * a[4] * a[7]
+      a[13] * a[3] * a[8] + a[13] * a[4] * a[7]
   tm4[8]    = a[1] * a[7] * a[12] - a[1] * a[8] * a[11] - a[5] * a[3] * a[12] + a[5] * a[4] * a[11] + a[9] * a[3] * a[8] -
-  a[9] * a[4] * a[7]
+      a[9] * a[4] * a[7]
   tm4[9]    = a[5] * a[10] * a[16] - a[5] * a[12] * a[14] - a[9] * a[6] * a[16] + a[9] * a[8] * a[14] +
-  a[13] * a[6] * a[12] - a[13] * a[8] * a[10]
+      a[13] * a[6] * a[12] - a[13] * a[8] * a[10]
   tm4[10]   = -a[1] * a[10] * a[16] + a[1] * a[12] * a[14] + a[9] * a[2] * a[16] - a[9] * a[4] * a[14] -
-  a[13] * a[2] * a[12] + a[13] * a[4] * a[10]
+      a[13] * a[2] * a[12] + a[13] * a[4] * a[10]
   tm4[11]   = a[1] * a[6] * a[16] - a[1] * a[8] * a[14] - a[5] * a[2] * a[16] + a[5] * a[4] * a[14] + a[13] * a[2] * a
-  [8] - a[13] * a[4] * a[6]
+      [8] - a[13] * a[4] * a[6]
   tm4[12]   = -a[1] * a[6] * a[12] + a[1] * a[8] * a[10] + a[5] * a[2] * a[12] - a[5] * a[4] * a[10] -
-  a[9] * a[2] * a[8] + a[9] * a[4] * a[6]
+      a[9] * a[2] * a[8] + a[9] * a[4] * a[6]
   tm4[13]   = -a[5] * a[10] * a[15] + a[5] * a[11] * a[14] + a[9] * a[6] * a[15] - a[9] * a[7] * a[14] -
-  a[13] * a[6] * a[11] + a[13] * a[7] * a[10]
+      a[13] * a[6] * a[11] + a[13] * a[7] * a[10]
   tm4[14]   = a[1] * a[10] * a[15] - a[1] * a[11] * a[14] - a[9] * a[2] * a[15] + a[9] * a[3] * a[14] +
-  a[13] * a[2] * a[11] - a[13] * a[3] * a[10]
+      a[13] * a[2] * a[11] - a[13] * a[3] * a[10]
   tm4[15]   = -a[1] * a[6] * a[15] + a[1] * a[7] * a[14] + a[5] * a[2] * a[15] - a[5] * a[3] * a[14] -
-  a[13] * a[2] * a[7] + a[13] * a[3] * a[6]
+      a[13] * a[2] * a[7] + a[13] * a[3] * a[6]
   tm4[16]   = a[1] * a[6] * a[11] - a[1] * a[7] * a[10] - a[5] * a[2] * a[11] + a[5] * a[3] * a[10] + a[9] * a[2] * a[7] -
-  a[9] * a[3] * a[6]
+      a[9] * a[3] * a[6]
 
   local det = a[1] * tm4[1] + a[2] * tm4[5] + a[3] * tm4[9] + a[4] * tm4[13]
 
@@ -814,7 +814,7 @@ function mat4.to_frustum(a, infinite)
 
   -- Normalize the result
   t                = sqrt(frustum.left.a * frustum.left.a + frustum.left.b * frustum.left.b +
-  frustum.left.c * frustum.left.c)
+    frustum.left.c * frustum.left.c)
   frustum.left.a   = frustum.left.a / t
   frustum.left.b   = frustum.left.b / t
   frustum.left.c   = frustum.left.c / t
@@ -829,7 +829,7 @@ function mat4.to_frustum(a, infinite)
 
   -- Normalize the result
   t                = sqrt(frustum.right.a * frustum.right.a + frustum.right.b * frustum.right.b +
-  frustum.right.c * frustum.right.c)
+    frustum.right.c * frustum.right.c)
   frustum.right.a  = frustum.right.a / t
   frustum.right.b  = frustum.right.b / t
   frustum.right.c  = frustum.right.c / t
@@ -844,7 +844,7 @@ function mat4.to_frustum(a, infinite)
 
   -- Normalize the result
   t                = sqrt(frustum.bottom.a * frustum.bottom.a + frustum.bottom.b * frustum.bottom.b +
-  frustum.bottom.c * frustum.bottom.c)
+    frustum.bottom.c * frustum.bottom.c)
   frustum.bottom.a = frustum.bottom.a / t
   frustum.bottom.b = frustum.bottom.b / t
   frustum.bottom.c = frustum.bottom.c / t
@@ -873,7 +873,7 @@ function mat4.to_frustum(a, infinite)
 
   -- Normalize the result
   t                = sqrt(frustum.near.a * frustum.near.a + frustum.near.b * frustum.near.b +
-  frustum.near.c * frustum.near.c)
+    frustum.near.c * frustum.near.c)
   frustum.near.a   = frustum.near.a / t
   frustum.near.b   = frustum.near.b / t
   frustum.near.c   = frustum.near.c / t

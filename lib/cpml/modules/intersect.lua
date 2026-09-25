@@ -646,10 +646,10 @@ function intersect.capsule_capsule(c1, c2)
 end
 
 function intersect.closest_point_segment_segment(p1, p2, p3, p4)
-  local s           -- Distance of intersection along segment 1
-  local t           -- Distance of intersection along segment 2
-  local c1          -- Collision point on segment 1
-  local c2          -- Collision point on segment 2
+  local s            -- Distance of intersection along segment 1
+  local t            -- Distance of intersection along segment 2
+  local c1           -- Collision point on segment 1
+  local c2           -- Collision point on segment 2
 
   local d1 = p2 - p1 -- Direction of segment 1
   local d2 = p4 - p3 -- Direction of segment 2

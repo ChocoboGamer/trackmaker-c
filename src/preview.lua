@@ -768,7 +768,7 @@ function self.bakeEases()
           local filename = 'debug_' .. name
           love.filesystem.write(filename, chart.loadedScripts[name])
           os.execute('code --goto "' ..
-          love.filesystem.getRealDirectory(filename) .. '/' .. filename .. ':' .. line .. '"')
+            love.filesystem.getRealDirectory(filename) .. '/' .. filename .. ':' .. line .. '"')
         end
       else
         logs.warn('Error evaluating script: ' .. err)

@@ -129,7 +129,7 @@ local function simplex_2d(x, y)
 			iy, y1 = iy + 1, y1 - 1
 		end
 	]]
-  local xi = rshift(floor(y0 - x0), 31)                                                 -- y0 < x0
+  local xi = rshift(floor(y0 - x0), 31)                                                  -- y0 < x0
   local n1 = GetN2(ix + xi, iy + (1 - xi), x0 + 0.211324865 - xi, y0 - 0.788675135 + xi) -- x0 + G - xi, y0 + G - (1 - xi)
 
   -- Add contributions from each corner to get the final noise value.
@@ -195,17 +195,17 @@ local function simplex_3d(x, y, z)
 		end
 	]]
 
-  local xLy = rshift(floor(x0 - y0), 31)                                                                          -- x0 < y0
-  local yLz = rshift(floor(y0 - z0), 31)                                                                          -- y0 < z0
-  local xLz = rshift(floor(x0 - z0), 31)                                                                          -- x0 < z0
+  local xLy = rshift(floor(x0 - y0), 31)                                                                           -- x0 < y0
+  local yLz = rshift(floor(y0 - z0), 31)                                                                           -- y0 < z0
+  local xLz = rshift(floor(x0 - z0), 31)                                                                           -- x0 < z0
 
-  local i1 = band(1 - xLy, bor(1 - yLz, 1 - xLz))                                                                 -- x0 >= y0 and (y0 >= z0 or x0 >= z0)
-  local j1 = band(xLy, 1 - yLz)                                                                                   -- x0 < y0 and y0 >= z0
-  local k1 = band(yLz, bor(xLy, xLz))                                                                             -- y0 < z0 and (x0 < y0 or x0 < z0)
+  local i1 = band(1 - xLy, bor(1 - yLz, 1 - xLz))                                                                  -- x0 >= y0 and (y0 >= z0 or x0 >= z0)
+  local j1 = band(xLy, 1 - yLz)                                                                                    -- x0 < y0 and y0 >= z0
+  local k1 = band(yLz, bor(xLy, xLz))                                                                              -- y0 < z0 and (x0 < y0 or x0 < z0)
 
-  local i2 = bor(1 - xLy, band(1 - yLz, 1 - xLz))                                                                 -- x0 >= y0 or (y0 >= z0 and x0 >= z0)
-  local j2 = bor(xLy, 1 - yLz)                                                                                    -- x0 < y0 or y0 >= z0
-  local k2 = bor(band(1 - xLy, yLz), band(xLy, bor(yLz, xLz)))                                                    -- (x0 >= y0 and y0 < z0) or (x0 < y0 and (y0 < z0 or x0 < z0))
+  local i2 = bor(1 - xLy, band(1 - yLz, 1 - xLz))                                                                  -- x0 >= y0 or (y0 >= z0 and x0 >= z0)
+  local j2 = bor(xLy, 1 - yLz)                                                                                     -- x0 < y0 or y0 >= z0
+  local k2 = bor(band(1 - xLy, yLz), band(xLy, bor(yLz, xLz)))                                                     -- (x0 >= y0 and y0 < z0) or (x0 < y0 and (y0 < z0 or x0 < z0))
 
   local n1 = GetN3(ix + i1, iy + j1, iz + k1, x0 + 0.166666667 - i1, y0 + 0.166666667 - j1, z0 + 0.166666667 - k1) -- G
   local n2 = GetN3(ix + i2, iy + j2, iz + k2, x0 + 0.333333333 - i2, y0 + 0.333333333 - j2, z0 + 0.333333333 - k2) -- G2
@@ -233,7 +233,7 @@ local function GetN4(ix, iy, iz, iw, x, y, z, w)
   local index = band(Perms[ix + Perms[iy + Perms[iz + Perms[iw]]]], 0x1F)
 
   return max(0, (t * t) * (t * t)) *
-  (Grads4[index][0] * x + Grads4[index][1] * y + Grads4[index][2] * z + Grads4[index][3] * w)
+      (Grads4[index][0] * x + Grads4[index][1] * y + Grads4[index][2] * z + Grads4[index][3] * w)
 end
 
 -- A lookup table to traverse the simplex around a given point in 4D.
@@ -323,12 +323,12 @@ local function simplex_4d(x, y, z, w)
 
   local n0 = GetN4(ix, iy, iz, iw, x0, y0, z0, w0)
   local n1 = GetN4(ix + i1, iy + j1, iz + k1, iw + l1, x0 + 0.138196601 - i1, y0 + 0.138196601 - j1,
-    z0 + 0.138196601 - k1, w0 + 0.138196601 - l1)                                                                                                 -- G
+    z0 + 0.138196601 - k1, w0 + 0.138196601 - l1)                                                                          -- G
   local n2 = GetN4(ix + i2, iy + j2, iz + k2, iw + l2, x0 + 0.276393202 - i2, y0 + 0.276393202 - j2,
-    z0 + 0.276393202 - k2, w0 + 0.276393202 - l2)                                                                                                 -- G2
+    z0 + 0.276393202 - k2, w0 + 0.276393202 - l2)                                                                          -- G2
   local n3 = GetN4(ix + i3, iy + j3, iz + k3, iw + l3, x0 + 0.414589803 - i3, y0 + 0.414589803 - j3,
-    z0 + 0.414589803 - k3, w0 + 0.414589803 - l3)                                                                                                 -- G3
-  local n4 = GetN4(ix + 1, iy + 1, iz + 1, iw + 1, x0 - 0.447213595, y0 - 0.447213595, z0 - 0.447213595, w0 - 0.447213595)                        -- G4
+    z0 + 0.414589803 - k3, w0 + 0.414589803 - l3)                                                                          -- G3
+  local n4 = GetN4(ix + 1, iy + 1, iz + 1, iw + 1, x0 - 0.447213595, y0 - 0.447213595, z0 - 0.447213595, w0 - 0.447213595) -- G4
 
   return 2.210600293 * (n0 + n1 + n2 + n3 + n4)
 end

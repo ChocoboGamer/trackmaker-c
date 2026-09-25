@@ -11,7 +11,7 @@ local bound3_mt = {}
 local function new(min, max)
   return setmetatable({
     min = min, -- min: vec3, minimum value for each component
-    max = max -- max: vec3, maximum value for each component
+    max = max  -- max: vec3, maximum value for each component
   }, bound3_mt)
 end
 

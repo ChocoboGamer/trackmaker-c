@@ -73,11 +73,11 @@ local type_encoding = setmetatable({
   __index = function(_, k)
     assert(type(k) == 'string' and #k > 2)
     local first_letter = k:sub(1, 1)
-    if first_letter == '{' or first_letter == '(' then     -- named struct or union
+    if first_letter == '{' or first_letter == '(' then -- named struct or union
       return assert(select(3, k:find('%' .. first_letter .. '(%a+)=')))
     end
   end,
-  __newindex = nil,   -- read only table
+  __newindex = nil, -- read only table
 })
 
 ---convert a NULL pointer to nil
@@ -93,10 +93,10 @@ end
 local function cls(name)
   assert(name)
   if ffi.istype('id', name) then
-    return assert(ptr(C.object_getClass(name)))     -- get class from object
+    return assert(ptr(C.object_getClass(name))) -- get class from object
   end
   if type(name) == 'cdata' and ffi.istype('Class', name) then
-    return name     -- already a Class
+    return name -- already a Class
   end
   assert(type(name) == 'string')
   return assert(ptr(C.objc_lookUpClass(name)))
@@ -109,7 +109,7 @@ end
 local function sel(name, num_args)
   assert(name)
   if type(name) == 'cdata' and ffi.istype('SEL', name) then
-    return name     -- already a SEL
+    return name -- already a SEL
   end
   assert(type(name) == 'string')
   if num_args and num_args > 0 and name:sub(-1) ~= '_' then
@@ -117,7 +117,7 @@ local function sel(name, num_args)
   end
   local name, count = name:gsub('_', ':')
   if num_args then assert(count == num_args) end
-  return C.sel_registerName(name)   -- pointer is never NULL
+  return C.sel_registerName(name) -- pointer is never NULL
 end
 
 ---call a method for a SEL on a Class or object
@@ -158,7 +158,7 @@ local function msgSend(receiver, selector, ...)
       -- print("casting " .. tostring(lua_var) .. " to id")
       return ffi.cast(c_type, lua_var)
     end
-    return lua_var     -- no conversion necessary
+    return lua_var -- no conversion necessary
   end
 
   if type(receiver) == 'string' then receiver = cls(receiver) end
@@ -223,8 +223,8 @@ local function addMethod(class, selector, types, func)
   local selector = sel(selector)
 
   local signature = {}
-  table.insert(signature, type_encoding[types:sub(1, 1)])   -- return type
-  table.insert(signature, '(*)(')                           -- anonymous function
+  table.insert(signature, type_encoding[types:sub(1, 1)]) -- return type
+  table.insert(signature, '(*)(')                         -- anonymous function
   for i = 2, #types do
     table.insert(signature, type_encoding[types:sub(i, i)])
     if i < #types then table.insert(signature, ',') end
@@ -288,7 +288,7 @@ ffi.metatype('struct objc_object', {
   end,
   __newindex = function(object, selector, value)
     selector = string.format('set%s%s:', selector:sub(1, 1):upper(), selector:sub(2))
-    msgSend(object, sel(selector), value)     -- propertyName to setPropertyName
+    msgSend(object, sel(selector), value) -- propertyName to setPropertyName
   end
 })
 

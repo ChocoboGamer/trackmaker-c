@@ -101,7 +101,7 @@ self.getColumnColor = getColumnColor
 local function beatToY(b, sh)
   if config.config.cmod then
     return (sh or love.graphics.getHeight()) - getPadBottom() -
-    (conductor.timeAtBeat(b) - conductor.time) * getScaledScrollSpeed() * BASE_SCALE
+        (conductor.timeAtBeat(b) - conductor.time) * getScaledScrollSpeed() * BASE_SCALE
   else
     return (sh or love.graphics.getHeight()) - getPadBottom() -
         (b - conductor.beat) * getScaledScrollSpeed() * BASE_SCALE
@@ -114,10 +114,10 @@ self.beatToY = beatToY
 local function yToBeat(y, sh)
   if config.config.cmod then
     return conductor.beatAtTime(((sh or love.graphics.getHeight()) - getPadBottom() - y) / getScaledScrollSpeed() /
-    BASE_SCALE) + conductor.beat
+      BASE_SCALE) + conductor.beat
   else
     return ((sh or love.graphics.getHeight()) - getPadBottom() - y) / getScaledScrollSpeed() / BASE_SCALE +
-    conductor.beat
+        conductor.beat
   end
 end
 self.yToBeat = yToBeat

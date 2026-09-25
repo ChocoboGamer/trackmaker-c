@@ -30,7 +30,7 @@ local function new(initialWorldSize, initialWorldPos, minNodeSize, looseness)
 
   if minNodeSize > initialWorldSize then
     print('Minimum node size must be at least as big as the initial world size. Was: ' ..
-    minNodeSize .. ' Adjusted to: ' .. initialWorldSize)
+      minNodeSize .. ' Adjusted to: ' .. initialWorldSize)
     minNodeSize = initialWorldSize
   end
 
@@ -77,7 +77,7 @@ function Octree:add(obj, objBounds)
 
     if count > 20 then
       print('Aborted Add operation as it seemed to be going on forever (' ..
-      count - 1 .. ') attempts at growing the octree.')
+        count - 1 .. ') attempts at growing the octree.')
       return
     end
 
@@ -157,9 +157,9 @@ function Octree:grow(direction)
     if i == rootPos then
       children[i + 1] = oldRoot
     else
-      xDirection    = i % 2 == 0 and -1 or 1
-      yDirection    = i > 3 and -1 or 1
-      zDirection    = (i < 2 or (i > 3 and i < 6)) and -1 or 1
+      xDirection      = i % 2 == 0 and -1 or 1
+      yDirection      = i > 3 and -1 or 1
+      zDirection      = (i < 2 or (i > 3 and i < 6)) and -1 or 1
       children[i + 1] = Node(self.rootNode.baseLength, self.minSize, self.looseness,
         newCenter + vec3(xDirection * half, yDirection * half, zDirection * half))
     end
@@ -249,7 +249,7 @@ function OctreeNode:add(obj, objBounds)
         -- Does it fit?
         if intersect.encapsulate_aabb(self.children[best_fit_child].bounds, object.bounds) then
           self.children[best_fit_child]:add(object.data, object.bounds) -- Go a level deeper
-          table.remove(self.objects, i)                            -- Remove from here
+          table.remove(self.objects, i)                                 -- Remove from here
         end
       end
     end
@@ -551,7 +551,7 @@ end
 -- @return number One of the eight child octants
 function OctreeNode:best_fit_child(objBounds)
   return (objBounds.center.x <= self.center.x and 0 or 1) + (objBounds.center.y >= self.center.y and 0 or 4) +
-  (objBounds.center.z <= self.center.z and 0 or 2) + 1
+      (objBounds.center.z <= self.center.z and 0 or 2) + 1
 end
 
 --- Checks if there are few enough objects in this node and its children that the children should all be merged into this.

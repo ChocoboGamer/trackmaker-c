@@ -154,7 +154,9 @@ function M.SmoothStep(t) return 3 * pow(t, 2) - 2 * pow(t, 3) end
 
 function M.SmootherStep(t) return pow(t, 5) * (5 * t * (t * (7 * t * (2 * t - 9) + 108) - 84) + 126) end
 
-function M.SmoothestStep(t) return pow(t, 7) * 1716 +
-  7 * pow(t, 8) * (2 * t * (3 * t * (t * (11 * t * (2 * t - 13) + 390) - 572) + 1430) - 1287) end
+function M.SmoothestStep(t)
+  return pow(t, 7) * 1716 +
+      7 * pow(t, 8) * (2 * t * (3 * t * (t * (11 * t * (2 * t - 13) + 390) - 572) + 1430) - 1287)
+end
 
 return M

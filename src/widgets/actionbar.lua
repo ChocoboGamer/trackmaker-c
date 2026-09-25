@@ -600,7 +600,7 @@ ActionBarWidget.barItems = {
       {
         'Open storage directory',
         click = function()
-          os.execute("start " .. love.filesystem.getSaveDirectory())
+          os.execute('start ' .. love.filesystem.getSaveDirectory())
         end,
       },
       {},

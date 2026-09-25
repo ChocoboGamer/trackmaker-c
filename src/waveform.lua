@@ -10,7 +10,7 @@ self.samples            = {}
 
 local BUFFER_SIZE       = 4096
 
-local MESH_SEGMENT_SIZE = 1  -- seconds; different on different LODs
+local MESH_SEGMENT_SIZE = 1   -- seconds; different on different LODs
 local BASE_SAMPLE_RATE  = 128 -- vertices per second on base zoom
 
 local function getSampleRate()

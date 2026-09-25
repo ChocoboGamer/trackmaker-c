@@ -297,19 +297,19 @@ local function buildResourcesDirectoryTable(ResourcesTree, VirtualAddress)
 
     --Write the resource directory table
     Data[#Data + 1] = encodeNumber(0, 4, false)
-    Offset = Offset + 4                                                    --Characteristics
+    Offset = Offset + 4     --Characteristics
     Data[#Data + 1] = encodeNumber(0, 4, false)
-    Offset = Offset + 4                                                    --Time/Date Stamp
+    Offset = Offset + 4     --Time/Date Stamp
     Data[#Data + 1] = encodeNumber(0, 2, false)
-    Offset = Offset + 2                                                    --Major Version
+    Offset = Offset + 2     --Major Version
     Data[#Data + 1] = encodeNumber(0, 2, false)
-    Offset = Offset + 2                                                    --Minor Version
+    Offset = Offset + 2     --Minor Version
     Data[#Data + 1] = encodeNumber(#NameEntries, 2, false)
-    Offset = Offset + 2                                                    --Number of name entries
+    Offset = Offset + 2     --Number of name entries
     Data[#Data + 1] = encodeNumber(#IDEntries, 2, false)
-    Offset = Offset + 2                                                    --Number of ID entries
+    Offset = Offset + 2     --Number of ID entries
 
-    local EntriesID = #Data                                                --Where the entries data start
+    local EntriesID = #Data --Where the entries data start
 
     --Pre-Allocate the place for the entries
     for i = 1, #NameEntries + #IDEntries do
@@ -324,25 +324,25 @@ local function buildResourcesDirectoryTable(ResourcesTree, VirtualAddress)
       local String = encodeUTF16(Entry[1])
 
       Data[#Data + 1] = encodeNumber(#String / 2, 2, false)
-      Offset = Offset + 2                                                 --String Length
-      Data[#Data + 1] = String; Offset = Offset + #String                 --Unicode String
+      Offset = Offset + 2                                 --String Length
+      Data[#Data + 1] = String; Offset = Offset + #String --Unicode String
 
-      Entry[3] = StringRVA + 0x80000000                                   --A string name
+      Entry[3] = StringRVA + 0x80000000                   --A string name
       Entry[4] = Offset
 
-      if type(Entry[2]) == 'table' then                                                    --Sub-directory
-        Entry[4] = Entry[4] + 0x80000000                                                   --Set sub-directory flag
+      if type(Entry[2]) == 'table' then                         --Sub-directory
+        Entry[4] = Entry[4] + 0x80000000                        --Set sub-directory flag
         writeDirectory(Entry[2])
-      else                                                                                 --Data
+      else                                                      --Data
         Data[#Data + 1] = encodeNumber(VirtualAddress + Offset + 16, 4, false)
-        Offset = Offset + 4                                                                --Predict the DataRVA
+        Offset = Offset + 4                                     --Predict the DataRVA
         Data[#Data + 1] = encodeNumber(#Entry[2], 4, false)
-        Offset = Offset + 4                                                                --Size
+        Offset = Offset + 4                                     --Size
         Data[#Data + 1] = encodeNumber(0, 4, false)
-        Offset = Offset + 4                                                                --Codepoint
+        Offset = Offset + 4                                     --Codepoint
         Data[#Data + 1] = encodeNumber(0, 4, false)
-        Offset = Offset + 4                                                                --Reserved
-        Data[#Data + 1] = Entry[2]; Offset = Offset + #Entry[2]                            --The actual data
+        Offset = Offset + 4                                     --Reserved
+        Data[#Data + 1] = Entry[2]; Offset = Offset + #Entry[2] --The actual data
       end
     end
 
@@ -350,19 +350,19 @@ local function buildResourcesDirectoryTable(ResourcesTree, VirtualAddress)
       Entry[3] = Entry[1] --The entry id itself
       Entry[4] = Offset
 
-      if type(Entry[2]) == 'table' then                                                    --Sub-directory
-        Entry[4] = Entry[4] + 0x80000000                                                   --Set sub-directory flag
+      if type(Entry[2]) == 'table' then                         --Sub-directory
+        Entry[4] = Entry[4] + 0x80000000                        --Set sub-directory flag
         writeDirectory(Entry[2])
-      else                                                                                 --Data
+      else                                                      --Data
         Data[#Data + 1] = encodeNumber(VirtualAddress + Offset + 16, 4, false)
-        Offset = Offset + 4                                                                --Predict the DataRVA
+        Offset = Offset + 4                                     --Predict the DataRVA
         Data[#Data + 1] = encodeNumber(#Entry[2], 4, false)
-        Offset = Offset + 4                                                                --Size
+        Offset = Offset + 4                                     --Size
         Data[#Data + 1] = encodeNumber(0, 4, false)
-        Offset = Offset + 4                                                                --Codepoint
+        Offset = Offset + 4                                     --Codepoint
         Data[#Data + 1] = encodeNumber(0, 4, false)
-        Offset = Offset + 4                                                                --Reserved
-        Data[#Data + 1] = Entry[2]; Offset = Offset + #Entry[2]                            --The actual data
+        Offset = Offset + 4                                     --Reserved
+        Data[#Data + 1] = Entry[2]; Offset = Offset + #Entry[2] --The actual data
       end
     end
 
@@ -581,11 +581,11 @@ end
 local function skipDOSHeader(exeFile)
   if exeFile:read(2) ~= 'MZ' then error('This is not an executable file !', 3) end
 
-  exeFile:read(58)                                          --Skip 58 bytes
+  exeFile:read(58)                                           --Skip 58 bytes
 
   local PEHeaderOffset = decodeNumber(exeFile:read(4), true) --Offset to the 'PE\0\0' signature relative to the beginning of the file
 
-  exeFile:seek('set', PEHeaderOffset)                       --Seek into the PE Header
+  exeFile:seek('set', PEHeaderOffset)                        --Seek into the PE Header
 end
 
 local function skipPEHeader(exeFile)
@@ -855,7 +855,7 @@ function icapi.replaceIcon(exeFile, icoFile, newFile)
   end
 
   SectionsData[RSRC_ID] = SectionsData[RSRC_ID] ..
-  string.rep('\0', Align(#SectionsData[RSRC_ID], true) - #SectionsData[RSRC_ID])
+      string.rep('\0', Align(#SectionsData[RSRC_ID], true) - #SectionsData[RSRC_ID])
 
   local NewRSRCSize = Align(#SectionsData[RSRC_ID], true)
   local OldRSRCSize = DataDirectories[3][2]

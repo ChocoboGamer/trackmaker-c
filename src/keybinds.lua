@@ -360,7 +360,7 @@ binds.place_column_3 = {
 }
 binds.place_column_4 = {
   name = 'Place column 4 note',
-  keys = { '4', 'l'},
+  keys = { '4', 'l' },
   trigger = function()
     edit.beginNote(4)
   end,
@@ -404,7 +404,7 @@ binds.place_right_drift = {
 }
 binds.place_neutral_drift = {
   name = 'Place neutral drift',
-  keys = { '/', 't'},
+  keys = { '/', 't' },
   trigger = function()
     edit.placeDrift(xdrv.XDRVDriftDirection.Neutral)
   end

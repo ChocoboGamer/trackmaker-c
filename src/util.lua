@@ -178,7 +178,7 @@ function pretty(o, depth, seen)
     else
       for k, v in pairs(o) do
         local ks = (type(k) == 'string' and string.find(k, '^[a-zA-Z0-9_]+$')) and k or
-        ('[' .. pretty(k, depth + 1, seen) .. ']')
+            ('[' .. pretty(k, depth + 1, seen) .. ']')
         local vs = pretty(v, depth + 1, seen)
         local s = ks .. ' = ' .. vs
         local nPos = (string.find(str, '\n') or 0)

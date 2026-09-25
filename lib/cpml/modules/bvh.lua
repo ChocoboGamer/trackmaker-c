@@ -266,11 +266,11 @@ function BVH:splitNode(node)
   local objectCenter  = {}
   for i = startIndex, endIndex do
     objectCenter[1] = (self._bboxArray[1 + (i - 1) * 7 + 1] + self._bboxArray[1 + (i - 1) * 7 + 4]) *
-    0.5                                                                                 -- center = (min + max) / 2
+        0.5 -- center = (min + max) / 2
     objectCenter[2] = (self._bboxArray[1 + (i - 1) * 7 + 2] + self._bboxArray[1 + (i - 1) * 7 + 5]) *
-    0.5                                                                                 -- center = (min + max) / 2
+        0.5 -- center = (min + max) / 2
     objectCenter[3] = (self._bboxArray[1 + (i - 1) * 7 + 3] + self._bboxArray[1 + (i - 1) * 7 + 6]) *
-    0.5                                                                                 -- center = (min + max) / 2
+        0.5 -- center = (min + max) / 2
 
     for j = 1, 3 do
       if objectCenter[j] < extentCenters[j] then

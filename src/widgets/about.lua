@@ -46,8 +46,10 @@ function AboutWidget:draw()
   love.graphics.rectangle('fill', 0, 0, self.width, self.height)
 
   local t = love.timer.getTime()
-  local jillo_wobble = outSine(math.max(math.min((WOBBLE_DURATION - (t - self.lastJilloClick)) / WOBBLE_DURATION, 1), 0)) * 0.25
-  local chegg_wobble = outSine(math.max(math.min((WOBBLE_DURATION - (t - self.lastCheggClick)) / WOBBLE_DURATION, 1), 0)) * 0.25
+  local jillo_wobble = outSine(math.max(math.min((WOBBLE_DURATION - (t - self.lastJilloClick)) / WOBBLE_DURATION, 1), 0)) *
+  0.25
+  local chegg_wobble = outSine(math.max(math.min((WOBBLE_DURATION - (t - self.lastCheggClick)) / WOBBLE_DURATION, 1), 0)) *
+  0.25
 
   local jsx, jsy = SPRITE_SCALE + math.cos(t * 11) * jillo_wobble, SPRITE_SCALE + math.sin(t * 11) * jillo_wobble
   local csx, csy = SPRITE_SCALE + math.cos(t * 11) * chegg_wobble, SPRITE_SCALE + math.sin(t * 11) * chegg_wobble
@@ -65,7 +67,8 @@ function AboutWidget:draw()
   love.graphics.printf('modified by Chegg', 0, offset + 58, self.width, 'center')
   love.graphics.setColor(1, 1, 1, 1)
   love.graphics.draw(jillo, self.width / 3, offset + 40 + 85, 0, jsx, jsy, jillo:getWidth() / 2, jillo:getHeight() / 2)
-  love.graphics.draw(chegg, self.width / 3 * 2, offset + 40 + 85, 0, csx,csy, chegg:getWidth() / 2, chegg:getHeight() / 2)
+  love.graphics.draw(chegg, self.width / 3 * 2, offset + 40 + 85, 0, csx, csy, chegg:getWidth() / 2,
+    chegg:getHeight() / 2)
   love.graphics.setColor(colors.textSecondary:unpack())
   love.graphics.printf(
     'Licensed under the zlib license\nCopyright © 2024-2026\nJade "oatmealine" Monoids\nSee license.txt for more information',

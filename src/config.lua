@@ -124,9 +124,9 @@ end
 
 function self.toggle(...)
   local location, key = get_location(...)
-  
-  if type(location[key]) ~= "boolean" then
-    error("attempted to toggle a non-boolean config value: " .. table.concat({...}, '.'))
+
+  if type(location[key]) ~= 'boolean' then
+    error('attempted to toggle a non-boolean config value: ' .. table.concat({ ... }, '.'))
     return
   end
 
