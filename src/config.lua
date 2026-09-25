@@ -47,6 +47,7 @@ self.config = {
     modsDisplay = false,
   },
   disableNativeMacOSBar = false,
+  catjam = 1
 }
 self.defaults = deepcopy(self.config)
 

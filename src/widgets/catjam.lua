@@ -1,5 +1,6 @@
 local conductor = require 'src.conductor'
 local ContextWidget = require 'src.widgets.context'
+local config        = require 'src.config'
 
 ---@class CatjamWidget : Widget
 local CatjamWidget = Widget:extend()
@@ -48,7 +49,7 @@ function CatjamWidget:new(x, y)
   self.hasWindowDecorations = false
   self.resizable = false
 
-  self.jammer = JAMMERS[1]
+  self.jammer = JAMMERS[config.config.catjam]
 end
 
 function CatjamWidget:click(x, y, button)
@@ -56,9 +57,9 @@ function CatjamWidget:click(x, y, button)
 
   local entries = {}
 
-  for _, jam in ipairs(JAMMERS) do
+  for i, jam in ipairs(JAMMERS) do
     table.insert(entries,
-      { jam.name, function() self.jammer = jam end, toggle = true, value = self.jammer.name == jam.name })
+      { jam.name, function() self.jammer = jam config.set(i, 'catjam') end, toggle = true, value = self.jammer.name == jam.name })
   end
 
   table.insert(entries, {})
