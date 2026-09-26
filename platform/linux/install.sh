@@ -7,10 +7,10 @@ data_home=${XDG_DATA_HOME:=$HOME/.local/share}
 desktop_db=$data_home/applications
 mime_db=$data_home/mime
 
-echo "writing trackmaker.desktop to '$desktop_db/'"
+echo "writing trackmaker-c.desktop to '$desktop_db/'"
 mkdir -p "$desktop_db/"
-sed "s~Exec=.*~Exec=$(pwd)/start.sh %f~" ./desktop/trackmaker.desktop > "$desktop_db/trackmaker.desktop"
-sed -i "s~Icon=.*~Icon=$(pwd)/desktop/trackmaker.png~" "$desktop_db/trackmaker.desktop"
+sed "s~Exec=.*~Exec=$(pwd)/start.sh %f~" ./desktop/trackmaker-c.desktop > "$desktop_db/trackmaker-c.desktop"
+sed -i "s~Icon=.*~Icon=$(pwd)/desktop/trackmaker-c.png~" "$desktop_db/trackmaker-c.desktop"
 echo "writing MIME association for application-xdrv to '$mime_db/packages/'"
 mkdir -p "$mime_db/packages/"
 cp ./desktop/application-xdrv.xml "$mime_db/packages/"

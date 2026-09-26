@@ -13,5 +13,5 @@ then
   exit 1
 fi
 
-SDL_VIDEO_X11_WMCLASS="trackmaker" SDL_VIDEO_WAYLAND_WMCLASS="trackmaker" \
-love trackmaker.love "$@"
+SDL_VIDEO_X11_WMCLASS="trackmaker-c" SDL_VIDEO_WAYLAND_WMCLASS="trackmaker-c" \
+love trackmaker-c.love "$@"
