@@ -253,6 +253,8 @@ function self.openData(loaded, filepath, anonymous)
   self.sort()
   if not anonymous then
     self.chartLocation = filepath
+  else
+    self.chartLocation = nil
   end
   if filepath then self.chartDir = string.gsub(filepath, '([/\\])[^/\\]+$', '%1') end
   self.loadedScripts = {}
@@ -267,7 +269,9 @@ function self.openData(loaded, filepath, anonymous)
 
   logs.log('Loaded chart ' ..
     (self.metadata.musicTitle or self.metadata.musicAudio or filepath) .. ' ' .. self.diffMark())
-  config.appendRecent(filepath)
+  if filepath ~= nil and filepath ~= '' then
+    config.appendRecent(filepath)
+  end
 end
 
 local OPEN_FILE_FILTER = {
