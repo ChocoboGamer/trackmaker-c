@@ -215,8 +215,8 @@ end
 local checkTex = love.graphics.newImage('assets/sprites/check.png')
 
 local function canPlaceCheckpoint(x, y)
-  local left_edge = (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - getGuidelineGap() - 64)
-  local right_edge = (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - getGuidelineGap())
+  local left_edge = love.graphics.getWidth() / 2 + getLeftGap() - getGuidelineGap() - 64 * scale()
+  local right_edge = love.graphics.getWidth() / 2 + getLeftGap() - getGuidelineGap()
 
   if x < left_edge or x > right_edge then return end
 
@@ -242,7 +242,7 @@ local function drawCheckpoint(thing, sh)
   if y > (sh + 64) then return end
 
   local size = 12 / checkTex:getHeight()
-  local x = getLeftGap() - getGuidelineGap()
+  local x = getLeftGap() - getGuidelineGap() - 5
   local width = size * checkTex:getWidth()
   love.graphics.setColor(1, 1, 1, renderTransparent and 0.3 or 1)
   love.graphics.draw(checkTex, x, y, 0, size, size, checkTex:getWidth(), checkTex:getHeight() / 2)
@@ -1152,7 +1152,7 @@ function self.drawPost()
       hoveredEvent = nil
       for i = #timingEvents, 1, -1 do
         local event = timingEvents[i]
-        local x, y = getRightGap() + getGuidelineGap() + event.x + 6, beatToY(event.beat, sh)
+        local x, y = getRightGap() + getGuidelineGap() + event.x + 11, beatToY(event.beat, sh)
         local width, height = event.width, event.height
         local hovered = mx > x and mx < (x + width) and my > (y - height / 2) and my < (y + height / 2)
         if hovered then
@@ -1166,7 +1166,7 @@ function self.drawPost()
     love.graphics.setFont(fonts.inter_16)
 
     for _, event in ipairs(timingEvents) do
-      local x, y = getRightGap() + getGuidelineGap() + event.x + 6, beatToY(event.beat, sh)
+      local x, y = getRightGap() + getGuidelineGap() + event.x + 11, beatToY(event.beat, sh)
       local width, height = event.width, event.height
       local hovered = hoveredEvent == event
 
@@ -1276,8 +1276,8 @@ function self.drawPost()
 
   if selectionX and selectionY then
     local mx, my = love.mouse.getPosition()
-    local x1, y1, x2, y2 = math.min(sw/2-(sw/2-selectionX)*scale(), mx), math.min(beatToY(selectionY), my),
-        math.max(sw/2-(sw/2-selectionX)*scale(), mx),
+    local x1, y1, x2, y2 = math.min(sw / 2 - (sw / 2 - selectionX) * scale(), mx), math.min(beatToY(selectionY), my),
+        math.max(sw / 2 - (sw / 2 - selectionX) * scale(), mx),
         math.max(beatToY(selectionY), my)
 
     love.graphics.setColor(1, 1, 1, 0.2)
@@ -1385,10 +1385,10 @@ end
 function self.mousereleased(x, y, button)
   if not chart.loaded then return end
   if button == 1 and selectionX and selectionY then
-    local sw = love.graphics.getWidth()/2
+    local sw = love.graphics.getWidth() / 2
 
-    local x1, y1, x2, y2 = math.min(sw-(sw-selectionX)*scale(), x), math.min(beatToY(selectionY), y),
-        math.max(sw-(sw-selectionX)*scale(), x),
+    local x1, y1, x2, y2 = math.min(sw - (sw - selectionX) * scale(), x), math.min(beatToY(selectionY), y),
+        math.max(sw - (sw - selectionX) * scale(), x),
         math.max(beatToY(selectionY), y)
     selectionX, selectionY = nil, nil
 
