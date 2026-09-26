@@ -297,7 +297,7 @@ end
 
 local function updateSongPos()
   M.time = math.max(M.time, 0)
-  M.time = math.min(M.time, M.getDuration())
+  --M.time = math.min(M.time, M.getDuration())
   if not song then
     M.playing = false
     --M.time = 0

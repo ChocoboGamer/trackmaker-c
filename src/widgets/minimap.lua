@@ -28,16 +28,6 @@ function MinimapWidget:new(x, y)
   self.isMovable = false
 end
 
-function MinimapWidget:click(x, y, button)
-  if button ~= 2 then return end
-
-  local entries = {}
-
-  table.insert(entries, { 'Close', function() self.delete = true end })
-
-  openWidget(ContextWidget(self.x + x, self.y + y, entries))
-end
-
 function MinimapWidget:moveFrame(x, y)
   MinimapWidget.super.moveFrame(self, x, y)
   self.mx, self.my = self:translateLocal(x, y)
@@ -76,7 +66,7 @@ function MinimapWidget:draw()
   love.graphics.setCanvas(self.canvas)
   love.graphics.clear()
 
-  local chartDur = conductor.getDuration()
+  local chartDur = math.max(conductor.getDuration(), conductor.timeAtBeat(chart.chart[#chart.chart].beat + 8))
 
   for _, thing in ipairs(chart.chart) do
     if thing.note then
@@ -107,10 +97,10 @@ function MinimapWidget:draw()
   local beatS, beatE = conductor.beat, conductor.beat + 8
   local timeS, timeE = conductor.timeAtBeat(beatS), conductor.timeAtBeat(beatE)
 
-  local height = math.abs(timeE - timeS) / chartDur * self.height
+  local height = (timeE - timeS) / chartDur * self.height
 
   love.graphics.setColor(1, 1, 1, self.hovered and 0.5 or 0.3)
-  love.graphics.rectangle('fill', 0, self.height - clamp(timeE / chartDur, 0, 1) * (self.height - height), self.width,
+  love.graphics.rectangle('fill', 0, self.height * (1-clamp(timeE / chartDur, 0, 1)), self.width,
     height)
 
   if config.config.view.checkpoints then
@@ -125,7 +115,8 @@ function MinimapWidget:draw()
   end
 
   if self.hovered and love.mouse.isDown(1) then
-    conductor.seek((1 - clamp((self.my - height) / (self.height - height), 0, 1)) * chartDur)
+
+    conductor.seek((1 - clamp((math.max(self.my+height/2, height)) / (self.height), 0, 1)) * chartDur)
     events.redraw()
   end
 end
