@@ -125,8 +125,14 @@ self.yToBeat = yToBeat
 local function getLeft()
   return (-GAP_WIDTH / 2 - NOTE_WIDTH * 3) * scale()
 end
+local function getLeftGap()
+  return scale() * ((12 * 0.25) * BASE_SCALE - GAP_WIDTH - 6 * NOTE_WIDTH)
+end
 local function getRight()
   return -getLeft()
+end
+local function getRightGap()
+  return -getLeftGap()
 end
 local function getMLeft()
   return -GAP_WIDTH / 2 * scale()
@@ -134,6 +140,26 @@ end
 local function getMRight()
   return -getMLeft()
 end
+
+local function getGuidelineGap()
+  return 75 * scale()
+end
+
+local function dashLine(p1, p2, dash, gap)
+  local dy, dx = p2.y - p1.y, p2.x - p1.x
+  local an, st = math.atan2(dy, dx), dash + gap
+  local len    = math.sqrt(dx * dx + dy * dy)
+  local nm     = (len - dash) / st
+  love.graphics.push()
+  love.graphics.translate(p1.x, p1.y)
+  love.graphics.rotate(an)
+  for i = 0, nm do
+    love.graphics.line(i * st, 0, i * st + dash, 0)
+  end
+  love.graphics.line(nm * st, 0, nm * st + dash, 0)
+  love.graphics.pop()
+end
+
 
 local function drawNote(thing, sh)
   if config.config.previewMode and thing.beat < conductor.beat then return end
@@ -189,7 +215,10 @@ end
 local checkTex = love.graphics.newImage('assets/sprites/check.png')
 
 local function canPlaceCheckpoint(x, y)
-  if x > (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - 52) or x < (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - 52 - 32) then return end
+  local left_edge = (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - getGuidelineGap() - 64)
+  local right_edge = (love.graphics.getWidth() / 2 - GAP_WIDTH / 2 - NOTE_WIDTH * 3 - getGuidelineGap())
+
+  if x < left_edge or x > right_edge then return end
 
   local closest = quantize(yToBeat(y), edit.quantIndex)
   local closestY = beatToY(closest)
@@ -212,8 +241,8 @@ local function drawCheckpoint(thing, sh)
   if y < -64 then return -1 end
   if y > (sh + 64) then return end
 
-  local size = 12 / checkTex:getHeight() * scale()
-  local x = (-GAP_WIDTH / 2 - NOTE_WIDTH * 3 - 52) * scale()
+  local size = 12 / checkTex:getHeight()
+  local x = getLeftGap() - getGuidelineGap()
   local width = size * checkTex:getWidth()
   love.graphics.setColor(1, 1, 1, renderTransparent and 0.3 or 1)
   love.graphics.draw(checkTex, x, y, 0, size, size, checkTex:getWidth(), checkTex:getHeight() / 2)
@@ -303,6 +332,10 @@ local function drawGearShiftEnds(thing, sh)
 end
 
 local driftTex = love.graphics.newImage('assets/sprites/driftMarker.png')
+local driftOutlineTex = love.graphics.newImage('assets/sprites/driftOuter.png')
+local driftCenterTex = love.graphics.newImage('assets/sprites/driftInner.png')
+local driftLeftTex = love.graphics.newImage('assets/sprites/driftLeft.png')
+local driftRightTex = love.graphics.newImage('assets/sprites/driftRight.png')
 local DRIFT_SPACING = 1
 
 ---@param dir XDRVDriftDirection
@@ -387,6 +420,19 @@ local function drawDrift(thing, prevEvent, sh)
   if not (config.config.previewMode and conductor.beat > thing.beat) then
     local leftX = baseX * side - NOTE_WIDTH * 1.5 * scale()
     local rightX = baseX * side + NOTE_WIDTH * 1.5 * scale()
+    if dir == xdrv.XDRVDriftDirection.Neutral then
+      love.graphics.draw(driftCenterTex, 0,
+        y, 0, size / driftCenterTex:getWidth() * 1.5, size / driftCenterTex:getHeight() * 1.5,
+        driftCenterTex:getWidth() / 2, driftCenterTex:getHeight() / 2)
+    else
+      local sprite = dir == xdrv.XDRVDriftDirection.Left and driftLeftTex or driftRightTex
+      love.graphics.draw(sprite, 0,
+        y, 0, size / sprite:getWidth() * 1.5, size / sprite:getHeight() * 1.5,
+        sprite:getWidth() / 2, sprite:getHeight() / 2)
+    end
+    love.graphics.draw(driftOutlineTex, 0,
+      y, 0, size / driftOutlineTex:getWidth() * 1.5, size / driftOutlineTex:getHeight() * 1.5,
+      driftOutlineTex:getWidth() / 2, driftOutlineTex:getHeight() / 2)
     for x = leftX, rightX, 15 do
       love.graphics.line(x, y, math.min(x + 7, rightX), y)
     end
@@ -556,7 +602,7 @@ function self.updateTimingEvents()
   if not chart.loaded then return end
 
   for _, thing in ipairs(chart.chart) do
-    local x = GAP_WIDTH / 2 + NOTE_WIDTH * 3 + 52
+    local x = 0
 
     local lastEvent = timingEvents[#timingEvents]
     if lastEvent and beatCmp(thing.beat, lastEvent.beat) then
@@ -753,6 +799,36 @@ function self.drawCanvas(static)
 
   local padBottom = getPadBottom()
 
+  if not config.config.previewMode then
+    local quantCol = QUANT_COLORS[edit.quantIndex]
+
+    love.graphics.setColor((quantCol or QUANT_DEFAULT_COLOR):unpack())
+
+    local size = 30 * scale()
+
+    love.graphics.polygon('fill',
+      getLeftGap() - getGuidelineGap() / 2 - size / 2, sh - padBottom,
+      getLeftGap() - getGuidelineGap() / 2, sh - padBottom - size / 2,
+      getLeftGap() - getGuidelineGap() / 2 + size / 2, sh - padBottom,
+      getLeftGap() - getGuidelineGap() / 2, sh - padBottom + size / 2
+    )
+    love.graphics.polygon('fill',
+      getRightGap() + getGuidelineGap() / 2 - size / 2, sh - padBottom,
+      getRightGap() + getGuidelineGap() / 2, sh - padBottom - size / 2,
+      getRightGap() + getGuidelineGap() / 2 + size / 2, sh - padBottom,
+      getRightGap() + getGuidelineGap() / 2, sh - padBottom + size / 2
+    )
+
+    if not quantCol then
+      -- #TODO add quant numbers to all quants not just 96ths and 192nds
+      love.graphics.setColor(0, 0, 0, 1)
+      love.graphics.printf(tostring(getDivision(edit.quantIndex)), getLeft() - 45,
+        sh - padBottom - fonts.inter_12:getHeight() / 2, 30, 'center')
+      love.graphics.printf(tostring(getDivision(edit.quantIndex)), getRight() + 15,
+        sh - padBottom - fonts.inter_12:getHeight() / 2, 30, 'center')
+    end
+  end
+
   if not noNotes then
     local topB = math.ceil(yToBeat(0, sh)) + 1
     local botB = math.floor(yToBeat(sh, sh)) - 1
@@ -776,8 +852,8 @@ function self.drawCanvas(static)
       love.graphics.setColor(0.6, 0.6, 0.6, 1)
       if b == nextMeasure then
         if not config.config.previewMode then
-          love.graphics.print(tostring(nextMeasureI), math.floor(getRight() + 16),
-            math.floor(y - love.graphics.getFont():getHeight() / 2))
+          love.graphics.print(tostring(nextMeasureI), round(getRightGap() + 4),
+            round(y - love.graphics.getFont():getHeight() / 2 * scale()), 0, scale(), scale())
         end
         nextMeasureI = nextMeasureI + 1
         nextMeasure = conductor.measures[nextMeasureI]
@@ -808,6 +884,13 @@ function self.drawCanvas(static)
       love.graphics.line(x, 0, x, sh - padBottom)
     end
   end
+
+  love.graphics.setColor(1, 1, 1, 0.25)
+  local beat_size = beatToY(0) - beatToY(1 - 0.25)
+  dashLine({ x = getLeftGap() - getGuidelineGap(), y = -80 + (conductor.beat * beat_size) % 40 },
+    { x = getLeftGap() - getGuidelineGap(), y = sh + 80 + (conductor.beat * beat_size) % 40 }, 20, 20)
+  dashLine({ x = getRightGap() + getGuidelineGap(), y = -60 + (conductor.beat * beat_size) % 40 },
+    { x = getRightGap() + getGuidelineGap(), y = sh + 60 + (conductor.beat * beat_size) % 40 }, 20, 20)
 
   --print((12 * 0.25) * BASE_SCALE)
   --print((NOTE_WIDTH * 6 + GAP_WIDTH))
@@ -916,32 +999,6 @@ function self.drawCanvas(static)
   love.graphics.line(getRight(), sh - padBottom, getMRight(), sh - padBottom)
 
   love.graphics.setLineWidth(1)
-
-  if not config.config.previewMode then
-    local quantCol = QUANT_COLORS[edit.quantIndex]
-
-    love.graphics.setColor((quantCol or QUANT_DEFAULT_COLOR):unpack())
-    love.graphics.polygon('fill',
-      getLeft() - 15, sh - padBottom,
-      getLeft() - 30, sh - padBottom - 15,
-      getLeft() - 45, sh - padBottom,
-      getLeft() - 30, sh - padBottom + 15
-    )
-    love.graphics.polygon('fill',
-      getRight() + 15, sh - padBottom,
-      getRight() + 30, sh - padBottom - 15,
-      getRight() + 45, sh - padBottom,
-      getRight() + 30, sh - padBottom + 15
-    )
-
-    if not quantCol then
-      love.graphics.setColor(0, 0, 0, 1)
-      love.graphics.printf(tostring(getDivision(edit.quantIndex)), getLeft() - 45,
-        sh - padBottom - fonts.inter_12:getHeight() / 2, 30, 'center')
-      love.graphics.printf(tostring(getDivision(edit.quantIndex)), getRight() + 15,
-        sh - padBottom - fonts.inter_12:getHeight() / 2, 30, 'center')
-    end
-  end
 
   love.graphics.setLineWidth(1)
 
@@ -1095,7 +1152,7 @@ function self.drawPost()
       hoveredEvent = nil
       for i = #timingEvents, 1, -1 do
         local event = timingEvents[i]
-        local x, y = event.x * scale(), beatToY(event.beat, sh)
+        local x, y = getRightGap() + getGuidelineGap() + event.x + 6, beatToY(event.beat, sh)
         local width, height = event.width, event.height
         local hovered = mx > x and mx < (x + width) and my > (y - height / 2) and my < (y + height / 2)
         if hovered then
@@ -1109,7 +1166,7 @@ function self.drawPost()
     love.graphics.setFont(fonts.inter_16)
 
     for _, event in ipairs(timingEvents) do
-      local x, y = event.x * scale(), beatToY(event.beat, sh)
+      local x, y = getRightGap() + getGuidelineGap() + event.x + 6, beatToY(event.beat, sh)
       local width, height = event.width, event.height
       local hovered = hoveredEvent == event
 
@@ -1219,7 +1276,8 @@ function self.drawPost()
 
   if selectionX and selectionY then
     local mx, my = love.mouse.getPosition()
-    local x1, y1, x2, y2 = math.min(selectionX, mx), math.min(beatToY(selectionY), my), math.max(selectionX, mx),
+    local x1, y1, x2, y2 = math.min(sw/2-(sw/2-selectionX)*scale(), mx), math.min(beatToY(selectionY), my),
+        math.max(sw/2-(sw/2-selectionX)*scale(), mx),
         math.max(beatToY(selectionY), my)
 
     love.graphics.setColor(1, 1, 1, 0.2)
@@ -1327,7 +1385,10 @@ end
 function self.mousereleased(x, y, button)
   if not chart.loaded then return end
   if button == 1 and selectionX and selectionY then
-    local x1, y1, x2, y2 = math.min(selectionX, x), math.min(beatToY(selectionY), y), math.max(selectionX, x),
+    local sw = love.graphics.getWidth()/2
+
+    local x1, y1, x2, y2 = math.min(sw-(sw-selectionX)*scale(), x), math.min(beatToY(selectionY), y),
+        math.max(sw-(sw-selectionX)*scale(), x),
         math.max(beatToY(selectionY), y)
     selectionX, selectionY = nil, nil
 
