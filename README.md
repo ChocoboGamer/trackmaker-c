@@ -8,12 +8,12 @@ Heavily work-in-progress GUI chart editor for
 
 ## Run
 
-Download a [release](https://github.com/oatmealine/trackmaker/releases), and
+Download a [release](https://github.com/ChocoboGamer/trackmaker-c/releases), and
 follow the instructions:
 
-- **Windows**: Download and extract `trackmaker-win64-${ver}.zip`, then run
-  `trackmaker.exe`.
-- **macOS**: Download and extract `trackmaker-mac-${ver}.zip`. Either drag into
+- **Windows**: Download and extract `trackmaker-c-win64-${ver}.zip`, then run
+  `trackmaker-c.exe`.
+- **macOS**: Download and extract `trackmaker-c-mac-${ver}.zip`. Either drag into
   your Applications folder or run as usual.
 
   If you get an error along the lines of
@@ -22,7 +22,7 @@ follow the instructions:
 
   macOS builds should work on 10.11+. Apple Silicon remains untested as I do
   not have a machine to test the builds on.
-- **Linux**: Download and extract `trackmaker-linux-${ver}.zip`, and install
+- **Linux**: Download and extract `trackmaker-c-linux-${ver}.zip`, and install
   [LÖVE](https://love2d.org) from your distribution's package manager (`love2d`
   in most repos). Run `start.sh`. To add .xdrv file associations and have
   trackmaker show up in your application launcher, run `install.sh`.
@@ -35,19 +35,9 @@ follow the instructions:
     git clone https://github.com/oatmealine/trackmaker
     ```
 
-1. Get [nfd](https://github.com/Vexatos/nativefiledialog/tree/master/lua) w/
-[luarocks](https://luarocks.org):
-  
-    ```sh
-    luarocks install https://raw.githubusercontent.com/Vexatos/nativefiledialog/master/lua/nfd-scm-1.rockspec --local
-    ```
+1. Get [nfd](https://github.com/btzy/nativefiledialog-extended) and compile for desired development platforms.
 
-2. Drop it in the same folder as this repository:
-
-    ```sh
-    # for instance, on linux:
-    cp ~/.luarocks/lib/lua/5.1/nfd.so ./
-    ```
+2. Move nfd.dll/so/dylib into the same folder as this repository:
 
 3. Run with [LÖVE](https://love2d.org/):
 
