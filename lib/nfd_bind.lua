@@ -33,7 +33,15 @@ nfdresult_t NFD_SaveDialogU8(nfdu8char_t** outPath,
 const char* NFD_GetError(void);
 ]]
 
-local nfd = ffi.load('nfd')
+local nfd = nil
+local os = love.system.getOS()
+if os == "Windows" then
+  nfd = ffi.load('nfd')
+elseif os == "Linux" then
+  nfd = ffi.load(love.filesystem.getSourceBaseDirectory()..'/nfd.so')
+elseif os == "OS X" then
+  nfd = ffi.load(love.filesystem.getSourceBaseDirectory()..'/nfd.dylib')
+end
 
 local function nfd_init()
   local result = nfd.NFD_Init()
