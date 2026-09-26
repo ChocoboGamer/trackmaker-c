@@ -34,12 +34,14 @@ const char* NFD_GetError(void);
 ]]
 
 local nfd = nil
-local os = love.system.getOS()
+-- this module gets ran in a seperate thread and love.platform.getOS() is not available on threads.
+---@diagnostic disable-next-line: undefined-field
+local os = love._os
 if os == "Windows" then
   nfd = ffi.load('nfd')
 elseif os == "Linux" then
   nfd = ffi.load(love.filesystem.getSourceBaseDirectory()..'/nfd.so')
-elseif os == "OS X" then
+else
   nfd = ffi.load(love.filesystem.getSourceBaseDirectory()..'/nfd.dylib')
 end
 
